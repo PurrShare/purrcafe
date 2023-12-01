@@ -1,0 +1,35 @@
+[build-system]
+requires = ["setuptools~=68.2.2"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "purrcafe"
+version = "0.0.1"
+authors = [
+    { name="Ivan \"Spaceginner\"", email="ivan.demian2009@gmail.com" }
+]
+description = "purrshare backend"
+readme = "readme.md"
+requires-python = ">=3.12"
+classifiers = [
+    "Development Status :: 1 - Planning",
+    "Environment :: Web Environment",
+    "Intended Audience :: System Administrators",
+    "License :: OSI Approved :: GNU General Public License v2 (GPLv2)",
+    "Natural Language :: English",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: Implementation :: CPython",
+    "Topic :: Internet :: WWW/HTTP :: Dynamic Content",
+    "Topic :: Internet :: WWW/HTTP :: WSGI :: Application",
+    "Typing :: Typed",
+    "Private :: Internal",
+]
+license = { file = "license.txt" }
+dependencies = [
+    "fastapi ~= 0.104.1"
+]
+
+[project.urls]
+"Homepage" = "https://purrshare.net/"
+"Bug Tracker" = "https://github.com/PurrShare/purrcafe/issues"
