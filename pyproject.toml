@@ -27,7 +27,9 @@ classifiers = [
 ]
 license = { file = "license.txt" }
 dependencies = [
-    "fastapi ~= 0.104.1"
+    "fastapi ~= 0.104.1",
+    "uuid7 ~= 0.1.0",
+    "python-multipart ~= 0.0.6"
 ]
 
 [project.urls]
