@@ -39,7 +39,7 @@ class User:
     @name.setter
     def name(self, new_name: str) -> None:
         if len(new_name) > self.NAME_MAX_LENGTH:
-            raise ValueError(f"new name is longer than {self.NAME_MAX_LENGTH} characters")
+            raise WrongValueLengthError("name", "characters", self.NAME_MAX_LENGTH, None, len(new_name))
 
         with db_l.writer:
             db.execute("UPDATE users SET name=(?) WHERE id=(?)", (new_name, int(self.id)))
@@ -74,7 +74,7 @@ class User:
     @password_hash.setter
     def password_hash(self, new_password_hash: str) -> None:
         if len(new_password_hash) != self.PASSWORD_HASH_LENGTH:
-            raise ValueError(f"password hash must be {self.PASSWORD_HASH_LENGTH} characters long")
+            raise WrongHashLengthError("password", self.PASSWORD_HASH_LENGTH, len(new_password_hash))
 
         with db_l.writer:
             db.execute("UPDATE users SET password_hash=(?) WHERE id=(?)", (new_password_hash, int(self.id)))
