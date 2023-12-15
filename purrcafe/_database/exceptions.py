@@ -18,6 +18,20 @@ class DatabaseValueError(ValueError):
     pass
 
 
+class OperationPermissionError(DatabaseValueError):
+    operation: str
+    violation: str | None
+
+    def __init__(self, operation: str, violation: str | None = None) -> None:
+        super().__init__()
+
+        self.operation = operation
+        self.violation = violation
+
+    def __str__(self) -> str:
+        return f"{self.operation} is not allowed {f"due to {self.violation}" if self.violation is not None else ''}"
+
+
 class ObjectNotFound(DatabaseValueError):
     name: str
     identifier: str

@@ -49,4 +49,10 @@ def login_oauth2(credentials: Annotated[OAuth2PasswordRequestForm, Depends()]) -
 
 @router.delete("/")
 def logout(session: Annotated[m_Session, Depends(authorize_token)]) -> None:
+    if int(session.id) == 0:
+        raise HTTPException(
+            status_code=403,
+            detail="cannot delete guest session"
+        )
+
     session.delete()

@@ -4,7 +4,7 @@ from typing import Final
 
 from . import User
 from ._database import _Nothing, database as db, database_lock as db_l
-from .exceptions import IDNotFoundError, ObjectIDUnknownError
+from .exceptions import IDNotFoundError, ObjectIDUnknownError, OperationPermissionError
 from ..meowid import MeowID
 
 
@@ -53,6 +53,9 @@ class Session:
 
     @expiration_datetime.setter
     def expiration_datetime(self, new_expiration_datetime: datetime.datetime | None) -> None:
+        if int(self.id) == 0:
+            raise OperationPermissionError("changing guest session properties")
+
         with db_l.writer:
             db.execute("UPDATE sessions SET expiration_datetime=(?) WHERE id=(?)", (new_expiration_datetime, int(self.id)))
             db.commit()
@@ -110,6 +113,9 @@ class Session:
         return session
 
     def delete(self) -> None:
+        if int(self.id) == 0:
+            raise OperationPermissionError("deletion of guest session")
+
         with db_l.writer:
             db.execute("DELETE FROM sessions WHERE id=(?)", (int(self.id),))
             db.commit()

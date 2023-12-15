@@ -58,6 +58,12 @@ def get_file_meta(file: Annotated[m_File, Depends(get_file)]) -> s_FileMetadata:
 
 @router.delete("/{id}")
 def delete_file(user: Annotated[m_User, Depends(authorize_user)], file: Annotated[m_File, Depends(get_file)]) -> None:
+    if int(file.uploader_id) == 0:
+        raise HTTPException(
+            status_code=403,
+            detail="cannot delete file uploaded by guest user"
+        )
+
     if file.uploader_id != user.id:
         raise HTTPException(
             status_code=403,

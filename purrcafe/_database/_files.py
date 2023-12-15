@@ -4,7 +4,7 @@ from typing import Final
 
 from . import User
 from ._database import _Nothing, database as db, database_lock as db_l
-from .exceptions import WrongHashLengthError, IDNotFoundError, ObjectIDUnknownError, WrongValueLengthError
+from .exceptions import WrongHashLengthError, IDNotFoundError, ObjectIDUnknownError, WrongValueLengthError, OperationPermissionError
 from ..meowid import MeowID
 
 
@@ -191,13 +191,16 @@ class File:
         with db_l.writer:
             db.execute(
                 "INSERT INTO files VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
-                (int(file._id), file._uploader_id, file._uploader_hidden, file._upload_datetime, file._expiration_datetime, file._filename, file._encrypted_data, file._encrypted_data_hash)
+                (int(file._id), int(file._uploader_id), file._uploader_hidden, file._upload_datetime, file._expiration_datetime, file._filename, file._encrypted_data, file._encrypted_data_hash)
             )
             db.commit()
 
         return file
 
     def delete(self) -> None:
+        if int(self.uploader_id) == 0:
+            raise OperationPermissionError("deletion of files uploaded by guest")
+
         with db_l.writer:
             db.execute("DELETE FROM files WHERE id=(?)", (int(self.id),))
             db.commit()

@@ -49,6 +49,12 @@ def get_foreign_user(id: str) -> s_ForeignUser:
 
 @router.patch("/me")
 def update_account(user: Annotated[m_User, Depends(authorize_user)], patch: s_UpdateUser) -> None:
+    if int(user.id) == 0:
+        raise HTTPException(
+            status_code=403,
+            detail="cannot patch guest user"
+        )
+
     if patch.name is not None:
         user.name = patch.name
 
@@ -61,4 +67,10 @@ def update_account(user: Annotated[m_User, Depends(authorize_user)], patch: s_Up
 
 @router.delete("/me")
 def delete_account(user: Annotated[m_User, Depends(authorize_user)]) -> None:
+    if int(user.id) == 0:
+        raise HTTPException(
+            status_code=403,
+            detail="cannot delete guest user"
+        )
+
     user.delete()
