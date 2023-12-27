@@ -10,7 +10,7 @@ def complete_migrations(database: sqlite3.Connection, migrations_path: PathLike 
 
     logger.debug(f"applying migrations from {migrations_path}")
 
-    for name, script in map(lambda path: (path.name, path.read_text()), filter(lambda path: path.is_file() and path.suffix == '.sql', migrations_path.iterdir())):
+    for name, script in map(lambda path: (path.name, path.read_text()), sorted(filter(lambda path: path.is_file() and path.suffix == '.sql', migrations_path.iterdir()), key=lambda path: path.name)):
         logger.info(f"applying '{name}' migration...")
         database.executescript(script)
         database.commit()
