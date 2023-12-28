@@ -1,8 +1,8 @@
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, Header, HTTPException
-from starlette.requests import Request
-from starlette.responses import Response
+from fastapi.responses import Response, PlainTextResponse
+from fastapi.requests import Request
 
 from ._common import authorize_user, get_file
 from ._schemas import FileMetadata as s_FileMetadata
@@ -12,7 +12,7 @@ from ..._database.exceptions import WrongHashLengthError, WrongValueLengthError
 router = APIRouter()
 
 
-@router.post("/{filename}")
+@router.post("/{filename}", response_class=PlainTextResponse)
 async def upload_file(
         request: Request,
         user: Annotated[m_User, Depends(authorize_user)],
@@ -41,9 +41,12 @@ async def upload_file(
 
 
 @router.get("/{id}")
-def get_file_data(response: Response, file: Annotated[m_File, Depends(get_file)]) -> bytes:
-    response.headers["Encrypted-Data-Hash"] = file.encrypted_data_hash
-    return file.encrypted_data
+def get_file_data(file: Annotated[m_File, Depends(get_file)]) -> Response:
+    return Response(
+        content=file.encrypted_data,
+        headers={'Encrypted-Data-Hash': file.encrypted_data_hash},
+        media_type='application/octet-stream'
+    )
 
 
 @router.get("/{id}/meta")

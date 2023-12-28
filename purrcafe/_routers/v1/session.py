@@ -3,6 +3,7 @@ from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi.security import OAuth2PasswordRequestForm
+from fastapi.responses import PlainTextResponse
 
 from ._common import authorize_token, authorize_user
 from ._schemas import CreateSession as s_CreateSession, Session as s_Session, OAuth2LoginInfo
@@ -25,7 +26,7 @@ def get_all_sessions(user: Annotated[m_User, Depends(authorize_user)]) -> list[s
     return [str(session.id) for session in user.sessions]
 
 
-@router.post("/")
+@router.post("/", response_class=PlainTextResponse)
 def login(credentials: s_CreateSession) -> str:
     try:
         return str(m_User.find(credentials.owner_name).authorize(credentials.password_hash).id)

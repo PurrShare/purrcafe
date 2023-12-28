@@ -1,6 +1,7 @@
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException
+from fastapi.responses import PlainTextResponse
 
 from ._common import authorize_user
 from ._schemas import CreateUser as s_CreateUser, User as s_User, ForeignUser as s_ForeignUser, UpdateUser as s_UpdateUser
@@ -11,7 +12,7 @@ from ...meowid import MeowID
 router = APIRouter()
 
 
-@router.post("/")
+@router.post("/", response_class=PlainTextResponse)
 def create_account(user_info: s_CreateUser) -> str:
     try:
         return str(m_User.create(
