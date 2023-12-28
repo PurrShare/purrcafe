@@ -12,12 +12,13 @@ from ..._database.exceptions import WrongHashLengthError, WrongValueLengthError
 router = APIRouter()
 
 
+@router.post('/', response_class=PlainTextResponse)
 @router.post("/{filename}", response_class=PlainTextResponse)
 async def upload_file(
         request: Request,
         user: Annotated[m_User, Depends(authorize_user)],
         encrypted_data_hash: Annotated[str, Header(name="Encrypted-Data-Hash")],
-        filename: str | None = None,
+        filename: str = None,
         anonymous: bool = False
 ) -> str:
     try:
