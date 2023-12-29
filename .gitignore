@@ -4,3 +4,4 @@ __pycache__
 /.idea
 /purrcafe.sqlite3
 /requests.log
+/purrcafe/_database/migrations/state
