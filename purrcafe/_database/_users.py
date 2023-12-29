@@ -107,6 +107,8 @@ class User:
 
     @property
     def files(self):
+        from ._files import File
+
         return File.get_uploaded_by(self)
 
     def __init__(
