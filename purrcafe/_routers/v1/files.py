@@ -55,7 +55,7 @@ def get_file_data(file: Annotated[m_File, Depends(get_file)], t: bool = False) -
 def get_filename(file: Annotated[m_File, Depends(get_file)]) -> Response:
     return Response(
         status_code=308,
-        headers={'Location': f'n/{file.filename}'}
+        headers={'Location': f'n/{file.filename}' if file.filename is not None else '.'}
     )
 
 
