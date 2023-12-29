@@ -42,11 +42,11 @@ async def upload_file(
 
 
 @router.get("/{id}")
-def get_file_data(file: Annotated[m_File, Depends(get_file)]) -> Response:
+def get_file_data(file: Annotated[m_File, Depends(get_file)], d: bool = True) -> Response:
     return Response(
         content=file.encrypted_data,
         headers={'Encrypted-Data-Hash': file.encrypted_data_hash},
-        media_type='application/octet-stream'
+        media_type='application/octet-stream' if d else 'text/plain'
     )
 
 
