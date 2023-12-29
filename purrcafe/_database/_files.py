@@ -123,7 +123,7 @@ class File:
         return self._encrypted_data_hash
 
     @encrypted_data_hash.setter
-    def encrypted_data_hash(self, new_encrypted_data: bytes) -> None:
+    def encrypted_data_hash(self, new_encrypted_data: str) -> None:
         with db_l.writer:
             db.execute("UPDATE files SET encrypted_data_hash=(?) WHERE id=(?)", (new_encrypted_data, int(self.id)))
             db.commit()
