@@ -22,7 +22,6 @@ async def upload_file(
         anonymous: bool = False
 ) -> str:
     try:
-        print(mime_type)
         return str(m_File.create(
             uploader=user,
             uploader_hidden=anonymous,
