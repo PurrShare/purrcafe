@@ -61,17 +61,11 @@ def get_filename(file: Annotated[m_File, Depends(get_file)]) -> Response:
 
 @router.get("/{id}/n/{name}")
 def get_file_data_with_name(file: Annotated[m_File, Depends(get_file)], name: str = None) -> Response:
-    if name == file.filename:
-        return Response(
-            content=file.encrypted_data,
-            headers={'Encrypted-Data-Hash': file.encrypted_data_hash},
-            media_type=file.mime_type
-        )
-    else:
-        return Response(
-            status_code=308,
-            headers={'Location': f'{file.filename}' if file.filename is not None else '..'}
-        )
+    return Response(
+        content=file.encrypted_data,
+        headers={'Encrypted-Data-Hash': file.encrypted_data_hash},
+        media_type=file.mime_type
+    )
 
 
 @router.get("/{id}/meta")
