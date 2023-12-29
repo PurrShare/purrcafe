@@ -37,6 +37,17 @@ def get_account(user: Annotated[m_User, Depends(authorize_user)]) -> s_User:
     )
 
 
+@router.get("/me/files")
+def get_uploaded_files(user: Annotated[m_User, Depends(authorize_user)]) -> list[str]:
+    if int(user.id) == 0:
+        raise HTTPException(
+            status_code=403,
+            detail="can't view uploaded files if a guest",
+        )
+
+    return [str(file.id) for file in user.files]
+
+
 @router.get("/{id}")
 def get_foreign_user(id: str) -> s_ForeignUser:
     try:
