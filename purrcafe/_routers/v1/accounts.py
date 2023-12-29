@@ -45,7 +45,7 @@ def get_uploaded_files(user: Annotated[m_User, Depends(authorize_user)]) -> list
             detail="can't view uploaded files if a guest",
         )
 
-    return [str(file.id) for file in user.files]
+    return [str(file.id) for file in user.uploaded_files]
 
 
 @router.get("/{id}")

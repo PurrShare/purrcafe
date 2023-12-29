@@ -106,7 +106,7 @@ class User:
         return Session.get_owned_by(self)
 
     @property
-    def files(self):
+    def uploaded_files(self):
         from ._files import File
 
         return File.get_uploaded_by(self)
@@ -193,7 +193,7 @@ class User:
         for session in self.sessions:
             session.delete()
 
-        for file in self.files:
+        for file in self.uploaded_files:
             file.delete()
 
         with db_l.writer:
