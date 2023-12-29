@@ -11,10 +11,10 @@ from ..meowid import MeowID
 class Session:
     DEFAULT_LIFETIME: Final[datetime.timedelta] = datetime.timedelta(days=30)
 
-    _id: MeowID | type[_Nothing] = _Nothing
-    _owner_id: MeowID | type[_Nothing] = _Nothing
-    _creation_datetime: datetime.datetime | type[_Nothing] = _Nothing
-    _expiration_datetime: datetime.datetime | None | type[_Nothing] = _Nothing
+    _id: MeowID | type[_Nothing]
+    _owner_id: MeowID | type[_Nothing]
+    _creation_datetime: datetime.datetime | type[_Nothing]
+    _expiration_datetime: datetime.datetime | None | type[_Nothing]
 
     @property
     def id(self) -> MeowID:

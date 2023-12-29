@@ -13,15 +13,15 @@ class File:
     ENCRYPTED_DATA_HASH_LENGTH: Final[int] = 32
     MAX_FILE_SIZE: Final[int] = 20971520  # 20 MiB
 
-    _id: MeowID | type[_Nothing] = _Nothing
-    _uploader_id: MeowID | type[_Nothing] = _Nothing
-    _uploader_hidden: bool | type[_Nothing] = _Nothing
-    _upload_datetime: datetime.datetime | type[_Nothing] = _Nothing
-    _expiration_datetime: datetime.datetime | None | type[_Nothing] = _Nothing
-    _filename: str | None | type[_Nothing] = _Nothing
-    _encrypted_data: bytes | type[_Nothing] = _Nothing
-    _encrypted_data_hash: str | type[_Nothing] = _Nothing
-    _mime_type: str | None | type[_Nothing] = _Nothing
+    _id: MeowID | type[_Nothing]
+    _uploader_id: MeowID | type[_Nothing]
+    _uploader_hidden: bool | type[_Nothing]
+    _upload_datetime: datetime.datetime | type[_Nothing]
+    _expiration_datetime: datetime.datetime | None | type[_Nothing]
+    _filename: str | None | type[_Nothing]
+    _encrypted_data: bytes | type[_Nothing]
+    _encrypted_data_hash: str | type[_Nothing]
+    _mime_type: str | None | type[_Nothing]
 
     @property
     def id(self) -> MeowID:

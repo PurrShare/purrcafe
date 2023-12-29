@@ -15,11 +15,11 @@ class User:
     NAME_MAX_LENGTH: Final[int] = 32
     PASSWORD_HASH_LENGTH: Final[int] = 128
 
-    _id: MeowID | type[_Nothing] = _Nothing
-    _name: str | type[_Nothing] = _Nothing
-    _email: str | type[_Nothing] = _Nothing
-    _password_hash: str | type[_Nothing] = _Nothing
-    _creation_datetime: datetime.datetime | type[_Nothing] = _Nothing
+    _id: MeowID | type[_Nothing]
+    _name: str | type[_Nothing]
+    _email: str | type[_Nothing]
+    _password_hash: str | type[_Nothing]
+    _creation_datetime: datetime.datetime | type[_Nothing]
 
     @property
     def id(self) -> MeowID:
