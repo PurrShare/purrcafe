@@ -1,8 +1,7 @@
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, Header, HTTPException
+from fastapi import APIRouter, Depends, Header, HTTPException, Body
 from fastapi.responses import Response, PlainTextResponse
-from fastapi.requests import Request
 
 from ._common import authorize_user, get_file
 from ._schemas import FileMetadata as s_FileMetadata
@@ -15,19 +14,22 @@ router = APIRouter()
 @router.post('/', response_class=PlainTextResponse)
 @router.post("/{filename}", response_class=PlainTextResponse)
 async def upload_file(
-        request: Request,
+        data: Annotated[bytes, Body(media_type="application/octet-stream")],
         user: Annotated[m_User, Depends(authorize_user)],
-        encrypted_data_hash: Annotated[str, Header(name="Encrypted-Data-Hash")],
+        encrypted_data_hash: Annotated[str, Header()],
+        mime_type: Annotated[str, Header(alias="Content-Type")],
         filename: str = None,
         anonymous: bool = False
 ) -> str:
     try:
+        print(mime_type)
         return str(m_File.create(
             uploader=user,
             uploader_hidden=anonymous,
             filename=filename,
-            encrypted_data=await request.body(),
-            encrypted_data_hash=encrypted_data_hash
+            encrypted_data=data,
+            encrypted_data_hash=encrypted_data_hash,
+            mime_type=mime_type
         ).id)
     except WrongHashLengthError as e:
         raise HTTPException(
@@ -42,11 +44,11 @@ async def upload_file(
 
 
 @router.get("/{id}")
-def get_file_data(file: Annotated[m_File, Depends(get_file)], d: bool = True) -> Response:
+def get_file_data(file: Annotated[m_File, Depends(get_file)], t: bool = False) -> Response:
     return Response(
         content=file.encrypted_data,
         headers={'Encrypted-Data-Hash': file.encrypted_data_hash},
-        media_type='application/octet-stream' if d else 'text/plain'
+        media_type=file.mime_type if not t else 'text/plain'
     )
 
 
@@ -64,7 +66,7 @@ def get_file_data_with_name(file: Annotated[m_File, Depends(get_file)], name: st
         return Response(
             content=file.encrypted_data,
             headers={'Encrypted-Data-Hash': file.encrypted_data_hash},
-            media_type='application/octet-stream'
+            media_type=file.mime_type
         )
     else:
         return Response(
@@ -79,7 +81,8 @@ def get_file_meta(file: Annotated[m_File, Depends(get_file)]) -> s_FileMetadata:
         uploader_id=str(file.uploader_id) if not file.uploader_hidden else None,
         upload_datetime=file.upload_datetime,
         expiration_datetime=file.expiration_datetime,
-        filename=file.filename
+        filename=file.filename,
+        mime_type=file.mime_type
     )
 
 

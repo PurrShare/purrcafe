@@ -21,6 +21,7 @@ class File:
     _filename: str | None | type[_Nothing] = _Nothing
     _encrypted_data: bytes | type[_Nothing] = _Nothing
     _encrypted_data_hash: str | type[_Nothing] = _Nothing
+    _mime_type: str | None | type[_Nothing] = _Nothing
 
     @property
     def id(self) -> MeowID:
@@ -129,6 +130,22 @@ class File:
 
         self._encrypted_data_hash = _Nothing
 
+    @property
+    def mime_type(self) -> str:
+        if self._mime_type is _Nothing:
+            with db_l.reader:
+                self._mime_type = db.execute("SELECT mime_type FROM files WHERE id=(?)", (int(self.id),)).fetchone()[0]
+
+        return self._mime_type
+
+    @mime_type.setter
+    def mime_type(self, new_mime_type: str) -> None:
+        with db_l.writer:
+            db.execute("UPDATE files SET mime_type=(?) WHERE id=(?)", (new_mime_type, int(self.id)))
+            db.commit()
+
+        self._mime_type = _Nothing
+
     def __init__(
             self,
             id: MeowID | int | type[_Nothing] = _Nothing,
@@ -138,7 +155,8 @@ class File:
             expiration_datetime: datetime.datetime | type[_Nothing] = _Nothing,
             filename: str | None | type[_Nothing] = _Nothing,
             encrypted_data: bytes | None | type[_Nothing] = _Nothing,
-            encrypted_data_hash: str | type[_Nothing] = _Nothing
+            encrypted_data_hash: str | type[_Nothing] = _Nothing,
+            mime_type: str | None | type[_Nothing] = _Nothing
     ) -> None:
         self._id = MeowID.from_int(id) if isinstance(id, int) else id
         self._uploader_id = uploader_id
@@ -148,6 +166,7 @@ class File:
         self._filename = filename
         self._encrypted_data = encrypted_data
         self._encrypted_data_hash = encrypted_data_hash
+        self._mime_type = mime_type
 
     @classmethod
     def get(cls, id_: MeowID) -> File:
@@ -170,7 +189,7 @@ class File:
             return [cls(*file_data) for file_data in db.execute("SELECT * FROM files WHERE uploader_id=(?)", (int(uploader.id),)).fetchall()]
 
     @classmethod
-    def create(cls, uploader: User, uploader_hidden: bool, filename: str | None, encrypted_data: bytes, encrypted_data_hash: str, lifetime: datetime.timedelta | None = DEFAULT_LIFETIME) -> File:
+    def create(cls, uploader: User, uploader_hidden: bool, filename: str | None, encrypted_data: bytes, encrypted_data_hash: str, mime_type: str | None, lifetime: datetime.timedelta | None = DEFAULT_LIFETIME) -> File:
         if len(encrypted_data_hash) != cls.ENCRYPTED_DATA_HASH_LENGTH:
             raise WrongHashLengthError("encrypted data", len(encrypted_data_hash), cls.ENCRYPTED_DATA_HASH_LENGTH)
 
@@ -185,13 +204,14 @@ class File:
             lifetime and timestamp + lifetime,
             filename,
             encrypted_data,
-            encrypted_data_hash
+            encrypted_data_hash,
+            mime_type
         )
 
         with db_l.writer:
             db.execute(
-                "INSERT INTO files VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
-                (int(file._id), int(file._uploader_id), file._uploader_hidden, file._upload_datetime, file._expiration_datetime, file._filename, file._encrypted_data, file._encrypted_data_hash)
+                "INSERT INTO files VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                (int(file._id), int(file._uploader_id), file._uploader_hidden, file._upload_datetime, file._expiration_datetime, file._filename, file._encrypted_data, file._encrypted_data_hash, file._mime_type)
             )
             db.commit()
 
