@@ -60,7 +60,7 @@ def get_filename(file: Annotated[m_File, Depends(get_file)]) -> Response:
 
 
 @router.get("/{id}/n/{name}")
-def get_file_data_with_name(file: Annotated[m_File, Depends(get_file)], name: str = None) -> Response:
+def get_file_data_with_name(file: Annotated[m_File, Depends(get_file)]) -> Response:
     return Response(
         content=file.encrypted_data,
         headers={'Encrypted-Data-Hash': file.encrypted_data_hash},
