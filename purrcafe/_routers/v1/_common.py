@@ -7,12 +7,15 @@ from ..._database import Session as m_Session, User as m_User, File as m_File
 from ..._database.exceptions import IDNotFoundError
 from ...meowid import MeowID
 
-_oauth2_scheme = OAuth2PasswordBearer(tokenUrl='v1/session/oauth2')
+_oauth2_scheme = OAuth2PasswordBearer(tokenUrl='v1/session/oauth2', auto_error=False)
 
 
-def authorize_token(token: Annotated[str, Depends(_oauth2_scheme)]) -> m_Session:
+def authorize_token(token: Annotated[str | None, Depends(_oauth2_scheme)]) -> m_Session:
     try:
-        return m_Session.get(MeowID.from_str(token))
+        if token is not None:
+            return m_Session.get(MeowID.from_str(token))
+        else:
+            return m_Session.get(MeowID.from_int(0))
     except IDNotFoundError:
         raise HTTPException(
             status_code=401,
