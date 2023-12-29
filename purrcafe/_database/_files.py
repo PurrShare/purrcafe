@@ -22,7 +22,7 @@ class File:
     _filename: str | None | type[_Nothing]
     _encrypted_data: bytes | type[_Nothing]
     _encrypted_data_hash: str | type[_Nothing]
-    _mime_type: str | None | type[_Nothing]
+    _mime_type: str | type[_Nothing]
 
     @property
     def id(self) -> MeowID:
@@ -157,7 +157,7 @@ class File:
             filename: str | None | type[_Nothing] = _Nothing,
             encrypted_data: bytes | None | type[_Nothing] = _Nothing,
             encrypted_data_hash: str | type[_Nothing] = _Nothing,
-            mime_type: str | None | type[_Nothing] = _Nothing
+            mime_type: str | type[_Nothing] = _Nothing
     ) -> None:
         self._id = MeowID.from_int(id) if isinstance(id, int) else id
         self._uploader_id = uploader_id
@@ -190,7 +190,7 @@ class File:
             return [cls(*file_data) for file_data in db.execute("SELECT * FROM files WHERE uploader_id=(?)", (int(uploader.id),)).fetchall()]
 
     @classmethod
-    def create(cls, uploader: User, uploader_hidden: bool, filename: str | None, encrypted_data: bytes, encrypted_data_hash: str, mime_type: str | None, lifetime: datetime.timedelta | None = DEFAULT_LIFETIME) -> File:
+    def create(cls, uploader: User, uploader_hidden: bool, filename: str | None, encrypted_data: bytes, encrypted_data_hash: str, mime_type: str, lifetime: datetime.timedelta | None = DEFAULT_LIFETIME) -> File:
         if len(encrypted_data_hash) != cls.ENCRYPTED_DATA_HASH_LENGTH:
             raise WrongHashLengthError("encrypted data", len(encrypted_data_hash), cls.ENCRYPTED_DATA_HASH_LENGTH)
 
