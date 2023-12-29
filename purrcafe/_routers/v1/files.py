@@ -70,7 +70,7 @@ def get_file_data_with_name(file: Annotated[m_File, Depends(get_file)], name: st
     else:
         return Response(
             status_code=308,
-            headers={'Location': f'{file.filename}'}
+            headers={'Location': f'{file.filename}' if file.filename is not None else '..'}
         )
 
 
