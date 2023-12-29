@@ -11,7 +11,8 @@ from ..meowid import MeowID
 class File:
     DEFAULT_LIFETIME: Final[datetime.timedelta] = datetime.timedelta(days=7)
     ENCRYPTED_DATA_HASH_LENGTH: Final[int] = 32
-    MAX_FILE_SIZE: Final[int] = 20971520  # 20 MiB
+    GUEST_MAX_FILE_SIZE: Final[int] = 20971520  # 20 MiB
+    MAX_FILE_SIZE = 31457280  # 30 MiB
 
     _id: MeowID | type[_Nothing]
     _uploader_id: MeowID | type[_Nothing]
@@ -193,8 +194,8 @@ class File:
         if len(encrypted_data_hash) != cls.ENCRYPTED_DATA_HASH_LENGTH:
             raise WrongHashLengthError("encrypted data", len(encrypted_data_hash), cls.ENCRYPTED_DATA_HASH_LENGTH)
 
-        if len(encrypted_data) > cls.MAX_FILE_SIZE:
-            raise WrongValueLengthError("encrypted data", "byte(s)", cls.MAX_FILE_SIZE, None, len(encrypted_data))
+        if len(encrypted_data) > (max_file_size := (cls.MAX_FILE_SIZE if int(uploader.id) != 0 else cls.GUEST_MAX_FILE_SIZE)):
+            raise WrongValueLengthError("encrypted data", "byte(s)", max_file_size, None, len(encrypted_data))
 
         file = cls(
             MeowID.generate(),
