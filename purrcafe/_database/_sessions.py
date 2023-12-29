@@ -106,7 +106,7 @@ class Session:
         with db_l.writer:
             db.execute(
                 "INSERT INTO sessions VALUES (?, ?, ?, ?)",
-                (int(session._id), session._owner_id, session._creation_datetime, session._expiration_datetime)
+                (int(session._id), int(session._owner_id), session._creation_datetime, session._expiration_datetime)
             )
             db.commit()
 
