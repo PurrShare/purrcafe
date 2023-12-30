@@ -32,14 +32,14 @@ class ForeignUser:
 class CreateUser:
     name: str
     email: str | None
-    password_hash: str
+    password: str
 
 
 @dataclass
 class UpdateUser:
     name: str | None = None
     email: str | None = None
-    password_hash: str | None = None
+    password: str | None = None
 
 
 @dataclass
@@ -51,7 +51,7 @@ class Session:
 @dataclass
 class CreateSession:
     owner_name: str
-    password_hash: str
+    password: str
     lifetime: datetime.timedelta = m_Session.DEFAULT_LIFETIME
 
 

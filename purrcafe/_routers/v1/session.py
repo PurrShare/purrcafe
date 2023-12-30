@@ -29,7 +29,7 @@ def get_all_sessions(user: Annotated[m_User, Depends(authorize_user)]) -> list[s
 @router.post("/", response_class=PlainTextResponse)
 def login(credentials: s_CreateSession) -> str:
     try:
-        return str(m_User.find(credentials.owner_name).authorize(credentials.password_hash).id)
+        return str(m_User.find(credentials.owner_name).authorize(credentials.password).id)
     except (ObjectNotFound, ValueMismatchError):
         raise HTTPException(
             status_code=401,

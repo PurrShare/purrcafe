@@ -7,6 +7,7 @@ from ._common import authorize_user
 from ._schemas import CreateUser as s_CreateUser, User as s_User, ForeignUser as s_ForeignUser, UpdateUser as s_UpdateUser
 from ..._database import User as m_User
 from ..._database.exceptions import WrongHashLengthError, IDNotFoundError
+from ..._utils import hash_password
 from ...meowid import MeowID
 
 router = APIRouter()
@@ -18,7 +19,7 @@ def create_account(user_info: s_CreateUser) -> str:
         return str(m_User.create(
             name=user_info.name,
             email=user_info.email,
-            password_hash=user_info.password_hash
+            password_hash=hash_password(user_info.password)
         ).id)
     except WrongHashLengthError as e:
         raise HTTPException(
@@ -73,8 +74,8 @@ def update_account(user: Annotated[m_User, Depends(authorize_user)], patch: s_Up
     if patch.email is not None:
         user.email = patch.email
 
-    if patch.password_hash is not None:
-        user.password_hash = patch.password_hash
+    if patch.password is not None:
+        user.password_hash = hash_password(patch.password)
 
 
 @router.delete("/me")

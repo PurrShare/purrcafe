@@ -3,9 +3,10 @@ import datetime
 from typing import Final
 import typing
 
+from ..meowid import MeowID
+from .._utils import verify_password
 from ._database import database as db, database_lock as db_l, _Nothing
 from .exceptions import WrongHashLengthError, IDNotFoundError, ObjectIDUnknownError, WrongValueLengthError, ValueMismatchError, ObjectNotFound, OperationPermissionError
-from ..meowid import MeowID
 if typing.TYPE_CHECKING:
     from ._sessions import Session
     from ._files import File
@@ -153,13 +154,10 @@ class User:
 
         return user
 
-    def authorize(self, password_hash: str | None, lifetime: datetime.timedelta = datetime.timedelta(days=7)) -> Session:  # i LOVE circular dependency error
+    def authorize(self, password: str, lifetime: datetime.timedelta = datetime.timedelta(days=7)) -> Session:  # i LOVE circular dependency error
         from ._sessions import Session
 
-        if (
-            (self.password_hash is not None and self.password_hash != password_hash) or
-            (self.password_hash is None and password_hash is not None)
-        ):
+        if self.password_hash is not None and verify_password(password, self.password_hash):
             raise ValueMismatchError("password", None, None)
 
         return Session.create(self, lifetime)
