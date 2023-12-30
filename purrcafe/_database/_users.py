@@ -12,6 +12,9 @@ if typing.TYPE_CHECKING:
 
 
 class User:
+    GUEST_ID: Final[int] = 0
+    ADMIN_ID: Final[int] = 1
+
     NAME_MAX_LENGTH: Final[int] = 32
     PASSWORD_HASH_LENGTH: Final[int] = 128
 

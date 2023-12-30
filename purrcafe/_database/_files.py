@@ -194,8 +194,9 @@ class File:
         if len(encrypted_data_hash) != cls.ENCRYPTED_DATA_HASH_LENGTH:
             raise WrongHashLengthError("encrypted data", len(encrypted_data_hash), cls.ENCRYPTED_DATA_HASH_LENGTH)
 
-        if len(encrypted_data) > (max_file_size := (cls.MAX_FILE_SIZE if int(uploader.id) != 0 else cls.GUEST_MAX_FILE_SIZE)):
-            raise WrongValueLengthError("encrypted data", "byte(s)", max_file_size, None, len(encrypted_data))
+        if uploader.id != User.ADMIN_ID:
+            if len(encrypted_data) > (max_file_size := (cls.MAX_FILE_SIZE if int(uploader.id) != User.GUEST_ID else cls.GUEST_MAX_FILE_SIZE)):
+                raise WrongValueLengthError("encrypted data", "byte(s)", max_file_size, None, len(encrypted_data))
 
         file = cls(
             MeowID.generate(),
