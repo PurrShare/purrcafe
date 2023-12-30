@@ -57,7 +57,7 @@ class File:
             db.execute("UPDATE files SET uploader_hidden=(?) WHERE id=(?)", (new_uploader_hidden, int(self.id)))
             db.commit()
 
-        self._expiration_datetime = _Nothing
+        self._uploader_hidden = new_uploader_hidden
 
     @property
     def upload_datetime(self) -> datetime.datetime:
@@ -81,7 +81,7 @@ class File:
             db.execute("UPDATE files SET expiration_datetime=(?) WHERE id=(?)", (new_expiration_datetime, int(self.id)))
             db.commit()
 
-        self._expiration_datetime = _Nothing
+        self._expiration_datetime = new_expiration_datetime
 
     @property
     def filename(self) -> str | None:
@@ -113,7 +113,7 @@ class File:
             db.execute("UPDATE files SET encrypted_data=(?) WHERE id=(?)", (new_encrypted_data, int(self.id)))
             db.commit()
 
-        self._encrypted_data = _Nothing
+        self._encrypted_data = new_encrypted_data
 
     @property
     def encrypted_data_hash(self) -> str:
@@ -124,12 +124,12 @@ class File:
         return self._encrypted_data_hash
 
     @encrypted_data_hash.setter
-    def encrypted_data_hash(self, new_encrypted_data: str) -> None:
+    def encrypted_data_hash(self, new_encrypted_data_hash: str) -> None:
         with db_l.writer:
-            db.execute("UPDATE files SET encrypted_data_hash=(?) WHERE id=(?)", (new_encrypted_data, int(self.id)))
+            db.execute("UPDATE files SET encrypted_data_hash=(?) WHERE id=(?)", (new_encrypted_data_hash, int(self.id)))
             db.commit()
 
-        self._encrypted_data_hash = _Nothing
+        self._encrypted_data_hash = new_encrypted_data_hash
 
     @property
     def mime_type(self) -> str:
@@ -145,7 +145,7 @@ class File:
             db.execute("UPDATE files SET mime_type=(?) WHERE id=(?)", (new_mime_type, int(self.id)))
             db.commit()
 
-        self._mime_type = _Nothing
+        self._mime_type = new_mime_type
 
     def __init__(
             self,

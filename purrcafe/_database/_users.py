@@ -51,7 +51,7 @@ class User:
             db.execute("UPDATE users SET name=(?) WHERE id=(?)", (new_name, int(self.id)))
             db.commit()
 
-        self._name = _Nothing
+        self._name = new_name
 
     @property
     def email(self) -> str | None:
@@ -70,7 +70,7 @@ class User:
             db.execute("UPDATE users SET email=(?) WHERE id=(?)", (new_email, int(self.id)))
             db.commit()
 
-        self._email = _Nothing
+        self._email = new_email
 
     @property
     def password_hash(self) -> str | None:
@@ -92,7 +92,7 @@ class User:
             db.execute("UPDATE users SET password_hash=(?) WHERE id=(?)", (new_password_hash, int(self.id)))
             db.commit()
 
-        self._password_hash = _Nothing
+        self._password_hash = new_password_hash
 
     @property
     def creation_datetime(self):

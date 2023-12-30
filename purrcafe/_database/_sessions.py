@@ -60,7 +60,7 @@ class Session:
             db.execute("UPDATE sessions SET expiration_datetime=(?) WHERE id=(?)", (new_expiration_datetime, int(self.id)))
             db.commit()
 
-        self._expiration_datetime = _Nothing
+        self._expiration_datetime = new_expiration_datetime
 
     def __init__(
             self,
