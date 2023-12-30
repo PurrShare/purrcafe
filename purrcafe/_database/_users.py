@@ -17,8 +17,8 @@ class User:
 
     _id: MeowID | type[_Nothing]
     _name: str | type[_Nothing]
-    _email: str | type[_Nothing]
-    _password_hash: str | type[_Nothing]
+    _email: str | None | type[_Nothing]
+    _password_hash: str | None | type[_Nothing]
     _creation_datetime: datetime.datetime | type[_Nothing]
 
     @property
@@ -51,7 +51,7 @@ class User:
         self._name = _Nothing
 
     @property
-    def email(self) -> str:
+    def email(self) -> str | None:
         if self._email is _Nothing:
             with db_l.reader:
                 self._email = db.execute("SELECT email FROM users WHERE id=(?)", (int(self.id),)).fetchone()[0]
@@ -59,7 +59,7 @@ class User:
         return self._email
 
     @email.setter
-    def email(self, new_email: str) -> None:
+    def email(self, new_email: str | None) -> None:
         if int(self.id) == 0:
             raise OperationPermissionError("changing guest user properties")
 
@@ -70,7 +70,7 @@ class User:
         self._email = _Nothing
 
     @property
-    def password_hash(self) -> str:
+    def password_hash(self) -> str | None:
         if self._password_hash is _Nothing:
             with db_l.reader:
                 self._password_hash = db.execute("SELECT password_hash FROM users WHERE id=(?)", (int(self.id),)).fetchone()[0]
@@ -78,7 +78,7 @@ class User:
         return self._password_hash
 
     @password_hash.setter
-    def password_hash(self, new_password_hash: str) -> None:
+    def password_hash(self, new_password_hash: str | None) -> None:
         if int(self.id) == 0:
             raise OperationPermissionError("changing guest user properties")
 
@@ -115,8 +115,8 @@ class User:
             self,
             id: MeowID | int | type[_Nothing] = _Nothing,
             name: str | type[_Nothing] = _Nothing,
-            email: str | type[_Nothing] = _Nothing,
-            password_hash: str | type[_Nothing] = _Nothing,
+            email: str | None | type[_Nothing] = _Nothing,
+            password_hash: str | None | type[_Nothing] = _Nothing,
             creation_datetime: datetime.datetime | type[_Nothing] = _Nothing
     ) -> None:
         self._id = MeowID.from_int(id) if isinstance(id, int) else id
@@ -126,7 +126,7 @@ class User:
         self._creation_datetime = creation_datetime
 
     @classmethod
-    def create(cls, name: str, email: str, password_hash: str) -> User:
+    def create(cls, name: str, email: str | None, password_hash: str | None) -> User:
         # TODO somehow remove the need to duplicate the checks
         if len(name) > cls.NAME_MAX_LENGTH:
             raise WrongValueLengthError("name", "characters", cls.NAME_MAX_LENGTH, None, len(name))
@@ -150,13 +150,13 @@ class User:
 
         return user
 
-    def authorize(self, password_hash: str, lifetime: datetime.timedelta = datetime.timedelta(days=7)) -> Session:  # i LOVE circular dependency error
-        if int(self.id) == 0:
-            raise OperationPermissionError("logging into guest account")
-
+    def authorize(self, password_hash: str | None, lifetime: datetime.timedelta = datetime.timedelta(days=7)) -> Session:  # i LOVE circular dependency error
         from ._sessions import Session
 
-        if self.password_hash != password_hash:
+        if (
+            (self.password_hash is not None and self.password_hash != password_hash) or
+            (self.password_hash is None and password_hash is not None)
+        ):
             raise ValueMismatchError("password", None, None)
 
         return Session.create(self, lifetime)

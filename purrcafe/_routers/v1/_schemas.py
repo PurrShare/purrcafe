@@ -11,7 +11,7 @@ from ..._database import Session as m_Session
 class User:
     id: str
     name: str
-    email: str
+    email: str | None
     creation_datetime: datetime.datetime
 
 
@@ -31,7 +31,7 @@ class ForeignUser:
 @dataclass
 class CreateUser:
     name: str
-    email: str
+    email: str | None
     password_hash: str
 
 

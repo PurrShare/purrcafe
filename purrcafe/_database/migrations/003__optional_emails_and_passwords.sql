@@ -1,0 +1,16 @@
+BEGIN TRANSACTION;
+
+CREATE TABLE new_users (
+   id INTEGER PRIMARY KEY NOT NULL,
+   name VARCHAR(32) UNIQUE NOT NULL,
+   email VARCHAR UNIQUE,
+   password_hash CHAR(128),
+   creation_datetime TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL
+);
+
+INSERT INTO new_users SELECT * FROM users;
+
+DROP TABLE users;
+ALTER TABLE new_users RENAME TO users;
+
+COMMIT;
