@@ -61,6 +61,7 @@ class FileMetadata:
     upload_datetime: datetime.datetime
     expiration_datetime: datetime.datetime | None
     filename: str | None
+    decrypted_data_hash: str | None
     mime_type: str
 
 

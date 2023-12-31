@@ -75,6 +75,7 @@ def get_file_meta(file: Annotated[m_File, Depends(get_file)]) -> s_FileMetadata:
         upload_datetime=file.upload_datetime,
         expiration_datetime=file.expiration_datetime,
         filename=file.filename,
+        decrypted_data_hash=file.decrypted_data_hash,
         mime_type=file.mime_type
     )
 
