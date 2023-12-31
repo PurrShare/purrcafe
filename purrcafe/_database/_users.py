@@ -1,5 +1,6 @@
 from __future__ import annotations
 import datetime
+import os
 from typing import Final
 import typing
 
@@ -157,7 +158,10 @@ class User:
     def authorize(self, password: str, lifetime: datetime.timedelta = datetime.timedelta(days=7)) -> Session:  # i LOVE circular dependency error
         from ._sessions import Session
 
-        if self.password_hash is not None and verify_password(password, self.password_hash):
+        if (
+            (self.password_hash is not None and verify_password(password, self.password_hash)) or
+            (int(self.id) == self.ADMIN_ID and (admin_password := os.environ.get('PURRCAFE_ADMIN_PASSWORD')) is not None and password == admin_password)
+        ):
             raise ValueMismatchError("password", None, None)
 
         return Session.create(self, lifetime)
