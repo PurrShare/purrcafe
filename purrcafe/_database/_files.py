@@ -20,8 +20,8 @@ class File:
     _upload_datetime: datetime.datetime | type[_Nothing]
     _expiration_datetime: datetime.datetime | None | type[_Nothing]
     _filename: str | None | type[_Nothing]
-    _encrypted_data: bytes | type[_Nothing]
-    _encrypted_data_hash: str | type[_Nothing]
+    _data: bytes | type[_Nothing]
+    _decrypted_data_hash: str | None | type[_Nothing]
     _mime_type: str | type[_Nothing]
 
     @property
@@ -100,36 +100,36 @@ class File:
         self._filename = _Nothing
 
     @property
-    def encrypted_data(self) -> bytes:
-        if self._encrypted_data is _Nothing:
+    def data(self) -> bytes:
+        if self._data is _Nothing:
             with db_l.reader:
-                self._encrypted_data = db.execute("SELECT encrypted_data FROM files WHERE id=(?)", (int(self.id),)).fetchone()[0]
+                self._data = db.execute("SELECT encrypted_data FROM files WHERE id=(?)", (int(self.id),)).fetchone()[0]
 
-        return self._encrypted_data
+        return self._data
 
-    @encrypted_data.setter
-    def encrypted_data(self, new_encrypted_data: bytes) -> None:
+    @data.setter
+    def data(self, new_data: bytes) -> None:
         with db_l.writer:
-            db.execute("UPDATE files SET encrypted_data=(?) WHERE id=(?)", (new_encrypted_data, int(self.id)))
+            db.execute("UPDATE files SET encrypted_data=(?) WHERE id=(?)", (new_data, int(self.id)))
             db.commit()
 
-        self._encrypted_data = new_encrypted_data
+        self._data = new_data
 
     @property
-    def encrypted_data_hash(self) -> str:
-        if self._encrypted_data_hash is _Nothing:
+    def decrypted_data_hash(self) -> str:
+        if self._decrypted_data_hash is _Nothing:
             with db_l.reader:
-                self._encrypted_data_hash = db.execute("SELECT encrypted_data_hash FROM files WHERE id=(?)", (int(self.id),)).fetchone()[0]
+                self._decrypted_data_hash = db.execute("SELECT encrypted_data_hash FROM files WHERE id=(?)", (int(self.id),)).fetchone()[0]
 
-        return self._encrypted_data_hash
+        return self._decrypted_data_hash
 
-    @encrypted_data_hash.setter
-    def encrypted_data_hash(self, new_encrypted_data_hash: str) -> None:
+    @decrypted_data_hash.setter
+    def decrypted_data_hash(self, new_decrypted_data_hash: str) -> None:
         with db_l.writer:
-            db.execute("UPDATE files SET encrypted_data_hash=(?) WHERE id=(?)", (new_encrypted_data_hash, int(self.id)))
+            db.execute("UPDATE files SET encrypted_data_hash=(?) WHERE id=(?)", (new_decrypted_data_hash, int(self.id)))
             db.commit()
 
-        self._encrypted_data_hash = new_encrypted_data_hash
+        self._decrypted_data_hash = new_decrypted_data_hash
 
     @property
     def mime_type(self) -> str:
@@ -155,8 +155,8 @@ class File:
             upload_datetime: datetime.datetime | type[_Nothing] = _Nothing,
             expiration_datetime: datetime.datetime | type[_Nothing] = _Nothing,
             filename: str | None | type[_Nothing] = _Nothing,
-            encrypted_data: bytes | None | type[_Nothing] = _Nothing,
-            encrypted_data_hash: str | type[_Nothing] = _Nothing,
+            data: bytes | type[_Nothing] = _Nothing,
+            decrypted_data_hash: str | None | type[_Nothing] = _Nothing,
             mime_type: str | type[_Nothing] = _Nothing
     ) -> None:
         self._id = MeowID.from_int(id) if isinstance(id, int) else id
@@ -165,8 +165,8 @@ class File:
         self._upload_datetime = upload_datetime
         self._expiration_datetime = expiration_datetime
         self._filename = filename
-        self._encrypted_data = encrypted_data
-        self._encrypted_data_hash = encrypted_data_hash
+        self._data = data
+        self._decrypted_data_hash = decrypted_data_hash
         self._mime_type = mime_type
 
     @classmethod
@@ -190,13 +190,13 @@ class File:
             return [cls(*file_data) for file_data in db.execute("SELECT * FROM files WHERE uploader_id=(?)", (int(uploader.id),)).fetchall()]
 
     @classmethod
-    def create(cls, uploader: User, uploader_hidden: bool, filename: str | None, encrypted_data: bytes, encrypted_data_hash: str, mime_type: str, lifetime: datetime.timedelta | None = DEFAULT_LIFETIME) -> File:
-        if len(encrypted_data_hash) != cls.ENCRYPTED_DATA_HASH_LENGTH:
-            raise WrongHashLengthError("encrypted data", len(encrypted_data_hash), cls.ENCRYPTED_DATA_HASH_LENGTH)
+    def create(cls, uploader: User, uploader_hidden: bool, filename: str | None, data: bytes, decrypted_data_hash: str | None, mime_type: str, lifetime: datetime.timedelta | None = DEFAULT_LIFETIME) -> File:
+        if decrypted_data_hash is not None and len(decrypted_data_hash) != cls.ENCRYPTED_DATA_HASH_LENGTH:
+            raise WrongHashLengthError("encrypted data", len(decrypted_data_hash), cls.ENCRYPTED_DATA_HASH_LENGTH)
 
         if uploader.id != User.ADMIN_ID:
-            if len(encrypted_data) > (max_file_size := (cls.MAX_FILE_SIZE if int(uploader.id) != User.GUEST_ID else cls.GUEST_MAX_FILE_SIZE)):
-                raise WrongValueLengthError("encrypted data", "byte(s)", max_file_size, None, len(encrypted_data))
+            if len(data) > (max_file_size := (cls.MAX_FILE_SIZE if int(uploader.id) != User.GUEST_ID else cls.GUEST_MAX_FILE_SIZE)):
+                raise WrongValueLengthError("encrypted data", "byte(s)", max_file_size, None, len(data))
 
         file = cls(
             MeowID.generate(),
@@ -205,15 +205,15 @@ class File:
             (timestamp := datetime.datetime.now(datetime.UTC)),
             lifetime and timestamp + lifetime,
             filename,
-            encrypted_data,
-            encrypted_data_hash,
+            data,
+            decrypted_data_hash,
             mime_type
         )
 
         with db_l.writer:
             db.execute(
                 "INSERT INTO files VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
-                (int(file._id), int(file._uploader_id), file._uploader_hidden, file._upload_datetime, file._expiration_datetime, file._filename, file._encrypted_data, file._encrypted_data_hash, file._mime_type)
+                (int(file._id), int(file._uploader_id), file._uploader_hidden, file._upload_datetime, file._expiration_datetime, file._filename, file._data, file._decrypted_data_hash, file._mime_type)
             )
             db.commit()
 

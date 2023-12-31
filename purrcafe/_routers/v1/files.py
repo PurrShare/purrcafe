@@ -16,7 +16,7 @@ router = APIRouter()
 async def upload_file(
         data: Annotated[bytes, Body(media_type="application/octet-stream")],
         user: Annotated[m_User, Depends(authorize_user)],
-        encrypted_data_hash: Annotated[str, Header()],
+        decrypted_data_hash: Annotated[str, Header()],
         mime_type: Annotated[str, Header(alias="Content-Type")],
         filename: str = None,
         anonymous: bool = False
@@ -26,8 +26,8 @@ async def upload_file(
             uploader=user,
             uploader_hidden=anonymous,
             filename=filename,
-            encrypted_data=data,
-            encrypted_data_hash=encrypted_data_hash,
+            data=data,
+            decrypted_data_hash=decrypted_data_hash,
             mime_type=mime_type
         ).id)
     except WrongHashLengthError as e:
@@ -45,8 +45,8 @@ async def upload_file(
 @router.get("/{id}")
 def get_file_data(file: Annotated[m_File, Depends(get_file)], t: bool = False) -> Response:
     return Response(
-        content=file.encrypted_data,
-        headers={'Encrypted-Data-Hash': file.encrypted_data_hash},
+        content=file.data,
+        headers={'Decrypted-Data-Hash': file.decrypted_data_hash} if file.decrypted_data_hash is not None else {},
         media_type=file.mime_type if not t else 'text/plain'
     )
 
@@ -62,8 +62,8 @@ def get_filename(file: Annotated[m_File, Depends(get_file)]) -> Response:
 @router.get("/{id}/n/{name}")
 def get_file_data_with_name(file: Annotated[m_File, Depends(get_file)]) -> Response:
     return Response(
-        content=file.encrypted_data,
-        headers={'Encrypted-Data-Hash': file.encrypted_data_hash},
+        content=file.data,
+        headers={'Decrypted-Data-Hash': file.decrypted_data_hash} if file.decrypted_data_hash is not None else {},
         media_type=file.mime_type
     )
 
