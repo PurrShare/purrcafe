@@ -10,6 +10,10 @@ class MeowIDError(RuntimeError):
     pass
 
 
+class MeowIDInvalid(ValueError, MeowIDError):
+    pass
+
+
 class MeowIDExhaustedError(MeowIDError):
     pass
 
@@ -53,22 +57,22 @@ class MeowID:
 
         if _checked:
             if (timestamp_t := timestamp.timestamp()) != (timestamp_tn := math.floor(timestamp_t)):
-                raise ValueError("timestamp's max resolution is seconds, higher is not supported")
+                raise MeowIDInvalid("timestamp's max resolution is seconds, higher is not supported")
 
             if not 0 <= timestamp_tn <= self.TIMESTAMP_MAX_VALUE:
-                raise ValueError(f"timestamp is out of range (must be within 0 and {self.TIMESTAMP_MAX_VALUE}")
+                raise MeowIDInvalid(f"timestamp is out of range (must be within 0 and {self.TIMESTAMP_MAX_VALUE}")
 
         self.timestamp = timestamp
 
         if _checked:
             if not 0 <= sequence_count <= self.SEQUENCE_COUNT_MAX_VALUE:
-                raise ValueError(f"sequence is out of range (must be within 0 and {self.SEQUENCE_COUNT_MAX_VALUE})")
+                raise MeowIDInvalid(f"sequence is out of range (must be within 0 and {self.SEQUENCE_COUNT_MAX_VALUE})")
 
         self.sequence_count = sequence_count
 
         if _checked:
             if not 0 <= salt <= self.SALT_MAX_VALUE:
-                raise ValueError(f"salt is out of range (must be within 0 and {self.SALT_MAX_VALUE}")
+                raise MeowIDInvalid(f"salt is out of range (must be within 0 and {self.SALT_MAX_VALUE}")
 
         self.salt = salt
 
@@ -84,13 +88,21 @@ class MeowID:
 
     @classmethod
     def from_str(cls, str_: str) -> MeowID:
-        # TODO validate input
+        if len(str_) not in (16, 18):
+            raise MeowIDInvalid("invalid string meowid format length")
 
-        return cls(
-            datetime.datetime.fromtimestamp(int((shortened := str_.replace('-', ''))[0:8], 16), datetime.UTC),
-            int(shortened[8:11], 16),
-            int(shortened[11:16], 16)
-        )
+        if len(str_) == 18:
+            if str_[8] != '-' or str_[12] != '-':
+                raise MeowIDInvalid("invalid long string meowid format")
+
+        try:
+            return cls(
+                datetime.datetime.fromtimestamp(int((shortened := str_.replace('-', ''))[0:8], 16), datetime.UTC),
+                int(shortened[8:11], 16),
+                int(shortened[11:16], 16)
+            )
+        except ValueError as e:
+            raise MeowIDInvalid(e) from None
 
     @classmethod
     def _generate_timestamp(cls) -> datetime.datetime:
