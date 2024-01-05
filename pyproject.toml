@@ -26,12 +26,6 @@ classifiers = [
     "Private :: Internal",
 ]
 license = { file = "license.txt" }
-dependencies = [
-    "fastapi ~= 0.104.1",
-    "uvicorn ~= 0.24.0.post1",
-    "python-multipart ~= 0.0.6",
-    "passlib[bcrypt] ~= 1.7.4"
-]
 
 [project.urls]
 "Homepage" = "https://purrshare.net/"
