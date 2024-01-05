@@ -18,7 +18,7 @@ class User:
     ADMIN_ID: Final[MeowID] = MeowID.from_int(1)
 
     NAME_MAX_LENGTH: Final[int] = 32
-    PASSWORD_HASH_LENGTH: Final[int] = 128
+    PASSWORD_HASH_LENGTH: Final[int] = 60
 
     _id: MeowID | type[_Nothing]
     _name: str | type[_Nothing]
