@@ -1,4 +1,6 @@
 from __future__ import annotations
+
+import functools
 import math
 import random
 import datetime
@@ -18,6 +20,7 @@ class MeowIDExhaustedError(MeowIDError):
     pass
 
 
+@functools.total_ordering
 class MeowID:
     TIMESTAMP_OFFSET: Final[int] = 32
     SEQUENCE_COUNT_OFFSET: Final[int] = 20
@@ -158,6 +161,16 @@ class MeowID:
 
     def __str__(self) -> str:
         return f"{self.timestamp_s:0>8x}-{self.sequence_count:0>3x}-{self.salt:0>5x}"
+
+    def __eq__(self, other: MeowID) -> bool:
+        return (
+            self.timestamp == other.timestamp and
+            self.sequence_count == other.sequence_count and
+            self.salt == other.salt
+        )
+
+    def __lt__(self, other: MeowID) -> bool:
+        return self.timestamp < other.timestamp
 
 
 def meowid_generator(count: int | None = None) -> Generator[MeowID, None, None]:
