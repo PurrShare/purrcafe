@@ -16,18 +16,14 @@ app = FastAPI(
 app.add_middleware(LoggingMiddleware)
 
 
-if os.environ.get('PURRCAFE_FUCK_OFF_CORS') == '1':
-    app.add_middleware(
-        CORSMiddleware,
-        allow_origins=["*"],
-        allow_methods=["*"],
-        allow_headers=["*"],
-        expose_headers=["*"],
-        allow_credentials=True
-    )
-else:
-    # TODO proper cors
-    raise NotImplementedError
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*" if os.environ.get('PURRCAFE_FUCK_OFF_CORS') == '1' else os.environ.get('PURRCAFE_ORIGIN', "backend.purrshare.net")],
+    allow_methods=["*"],
+    allow_headers=["*"],
+    expose_headers=["*"],
+    allow_credentials=True
+)
 
 
 app.state.limiter = limiter
