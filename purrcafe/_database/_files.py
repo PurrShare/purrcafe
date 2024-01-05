@@ -221,9 +221,6 @@ class File:
         return file
 
     def delete(self) -> None:
-        if int(self.uploader_id) == 0:
-            raise OperationPermissionError("deletion of files uploaded by guest")
-
         with db_l.writer:
             db.execute("DELETE FROM files WHERE id=(?)", (int(self.id),))
             db.commit()
