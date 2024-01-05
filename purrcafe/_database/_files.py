@@ -1,5 +1,6 @@
 from __future__ import annotations
 import datetime
+import os
 from typing import Final
 
 from . import User
@@ -11,8 +12,8 @@ from ..meowid import MeowID
 class File:
     DEFAULT_LIFETIME: Final[datetime.timedelta] = datetime.timedelta(days=7)
     ENCRYPTED_DATA_HASH_LENGTH: Final[int] = 32
-    GUEST_MAX_FILE_SIZE: Final[int] = 20971520  # 20 MiB
-    MAX_FILE_SIZE = 31457280  # 30 MiB
+    GUEST_MAX_FILE_SIZE: Final[int] = os.environ.get('PURRCAFE_MAXSIZE_GUEST', 20971520)  # 20 MiB
+    MAX_FILE_SIZE = os.environ.get('PURRCAFE_MAXSIZE', 31457280)  # 30 MiB
 
     _id: MeowID | type[_Nothing]
     _uploader_id: MeowID | type[_Nothing]
