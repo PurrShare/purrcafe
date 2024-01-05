@@ -104,14 +104,14 @@ class File:
     def data(self) -> bytes:
         if self._data is _Nothing:
             with db_l.reader:
-                self._data = db.execute("SELECT encrypted_data FROM files WHERE id=(?)", (int(self.id),)).fetchone()[0]
+                self._data = db.execute("SELECT data FROM files WHERE id=(?)", (int(self.id),)).fetchone()[0]
 
         return self._data
 
     @data.setter
     def data(self, new_data: bytes) -> None:
         with db_l.writer:
-            db.execute("UPDATE files SET encrypted_data=(?) WHERE id=(?)", (new_data, int(self.id)))
+            db.execute("UPDATE files SET data=(?) WHERE id=(?)", (new_data, int(self.id)))
             db.commit()
 
         self._data = new_data
@@ -120,14 +120,14 @@ class File:
     def decrypted_data_hash(self) -> str:
         if self._decrypted_data_hash is _Nothing:
             with db_l.reader:
-                self._decrypted_data_hash = db.execute("SELECT encrypted_data_hash FROM files WHERE id=(?)", (int(self.id),)).fetchone()[0]
+                self._decrypted_data_hash = db.execute("SELECT decrypted_data_hash FROM files WHERE id=(?)", (int(self.id),)).fetchone()[0]
 
         return self._decrypted_data_hash
 
     @decrypted_data_hash.setter
     def decrypted_data_hash(self, new_decrypted_data_hash: str) -> None:
         with db_l.writer:
-            db.execute("UPDATE files SET encrypted_data_hash=(?) WHERE id=(?)", (new_decrypted_data_hash, int(self.id)))
+            db.execute("UPDATE files SET decrypted_data_hash=(?) WHERE id=(?)", (new_decrypted_data_hash, int(self.id)))
             db.commit()
 
         self._decrypted_data_hash = new_decrypted_data_hash
