@@ -5,6 +5,7 @@ from typing import Literal
 from pydantic.dataclasses import dataclass
 
 from ..._database import Session as m_Session
+from ..._database._database import _Nothing
 
 
 @dataclass
@@ -37,9 +38,9 @@ class CreateUser:
 
 @dataclass
 class UpdateUser:
-    name: str | None = None
-    email: str | None = None
-    password: str | None = None
+    name: str = _Nothing
+    email: str | None = _Nothing
+    password: str = _Nothing
 
 
 @dataclass

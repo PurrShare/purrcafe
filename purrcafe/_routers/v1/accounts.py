@@ -9,6 +9,7 @@ from ._common import authorize_user
 from ._schemas import CreateUser as s_CreateUser, User as s_User, ForeignUser as s_ForeignUser, UpdateUser as s_UpdateUser
 from ... import limiter
 from ..._database import User as m_User
+from ..._database._database import _Nothing
 from ..._database.exceptions import WrongHashLengthError, IDNotFoundError
 from ..._utils import hash_password
 from ...meowid import MeowID
@@ -84,13 +85,13 @@ def update_account(
             detail="cannot patch guest user"
         )
 
-    if patch.name is not None:
+    if patch.name is not _Nothing:
         user.name = patch.name
 
-    if patch.email is not None:
+    if patch.email is not _Nothing:
         user.email = patch.email
 
-    if patch.password is not None:
+    if patch.password is not _Nothing:
         user.password_hash = hash_password(patch.password)
 
 
