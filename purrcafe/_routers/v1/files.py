@@ -48,6 +48,7 @@ async def upload_file(
 
 
 @router.get("/{id}")
+@router.get("/{id}/n/{name}")
 @limiter.limit("1/second", key_func=get_remote_address)
 def get_file_data(
         request: Request,
@@ -66,19 +67,6 @@ def get_filename(file: Annotated[m_File, Depends(get_file)]) -> Response:
     return Response(
         status_code=308,
         headers={'Location': f'n/{file.filename}' if file.filename is not None else '.'}
-    )
-
-
-@router.get("/{id}/n/{name}")
-@limiter.limit("1/second", key_func=get_remote_address)
-def get_file_data_with_name(
-        request: Request,
-        file: Annotated[m_File, Depends(get_file)]
-) -> Response:
-    return Response(
-        content=file.data,
-        headers={'Decrypted-Data-Hash': file.decrypted_data_hash} if file.decrypted_data_hash is not None else {},
-        media_type=file.mime_type
     )
 
 
