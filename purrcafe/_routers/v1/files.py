@@ -21,7 +21,7 @@ async def upload_file(
         request: Request,
         data: Annotated[bytes, Body(media_type="application/octet-stream")],
         user: Annotated[m_User, Depends(authorize_user)],
-        mime_type: Annotated[str, Header(alias="Content-Type")],
+        mime_type: Annotated[str, Header(alias="Content-Type")] = m_File.DEFAULT_CONTENT_TYPE,
         filename: str = None,
         decrypted_data_hash: Annotated[str, Header()] = None,
         max_access_count: Annotated[int, Header()] = None,
