@@ -232,11 +232,11 @@ class File:
     @classmethod
     def create(cls, uploader: User, uploader_hidden: bool, lifetime: datetime.timedelta | None, filename: str | None, data: bytes, decrypted_data_hash: str | None, mime_type: str, max_access_count: int | None) -> File:
         if decrypted_data_hash is not None and len(decrypted_data_hash) != cls.ENCRYPTED_DATA_HASH_LENGTH:
-            raise WrongHashLengthError("encrypted data", len(decrypted_data_hash), cls.ENCRYPTED_DATA_HASH_LENGTH)
+            raise WrongHashLengthError("decrypted data", len(decrypted_data_hash), cls.ENCRYPTED_DATA_HASH_LENGTH)
 
         if uploader.id != User.ADMIN_ID:
             if len(data) > (max_file_size := (cls.MAX_FILE_SIZE if int(uploader.id) != User.GUEST_ID else cls.GUEST_MAX_FILE_SIZE)):
-                raise WrongValueLengthError("encrypted data", "byte(s)", max_file_size, None, len(data))
+                raise WrongValueLengthError("data", "byte(s)", max_file_size, None, len(data))
 
         file = cls(
             MeowID.generate(),
