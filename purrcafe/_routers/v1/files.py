@@ -99,7 +99,7 @@ def delete_file(
             detail="cannot delete file uploaded by guest user"
         )
 
-    if file.uploader_id != user.id:
+    if user.id != m_User.ADMIN_ID and file.uploader_id != user.id:
         raise HTTPException(
             status_code=403,
             detail="only the user who uploaded the file can delete it"
