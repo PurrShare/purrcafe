@@ -2,9 +2,12 @@ from typing import Annotated
 
 from fastapi import APIRouter, Depends, Header, HTTPException, Body
 from fastapi.responses import Response, PlainTextResponse
+from slowapi.util import get_remote_address
+from starlette.requests import Request
 
 from ._common import authorize_user, get_file
 from ._schemas import FileMetadata as s_FileMetadata
+from ... import limiter
 from ..._database import File as m_File, User as m_User
 from ..._database.exceptions import WrongHashLengthError, WrongValueLengthError
 
@@ -13,7 +16,9 @@ router = APIRouter()
 
 @router.post('/', response_class=PlainTextResponse)
 @router.post("/{filename}", response_class=PlainTextResponse)
+@limiter.limit("2/minute")
 async def upload_file(
+        request: Request,
         data: Annotated[bytes, Body(media_type="application/octet-stream")],
         user: Annotated[m_User, Depends(authorize_user)],
         mime_type: Annotated[str, Header(alias="Content-Type")],
@@ -43,7 +48,12 @@ async def upload_file(
 
 
 @router.get("/{id}")
-def get_file_data(file: Annotated[m_File, Depends(get_file)], t: bool = False) -> Response:
+@limiter.limit("1/second", key_func=get_remote_address)
+def get_file_data(
+        request: Request,
+        file: Annotated[m_File, Depends(get_file)],
+        t: bool = False
+) -> Response:
     return Response(
         content=file.data,
         headers={'Decrypted-Data-Hash': file.decrypted_data_hash} if file.decrypted_data_hash is not None else {},
@@ -60,7 +70,11 @@ def get_filename(file: Annotated[m_File, Depends(get_file)]) -> Response:
 
 
 @router.get("/{id}/n/{name}")
-def get_file_data_with_name(file: Annotated[m_File, Depends(get_file)]) -> Response:
+@limiter.limit("1/second", key_func=get_remote_address)
+def get_file_data_with_name(
+        request: Request,
+        file: Annotated[m_File, Depends(get_file)]
+) -> Response:
     return Response(
         content=file.data,
         headers={'Decrypted-Data-Hash': file.decrypted_data_hash} if file.decrypted_data_hash is not None else {},
@@ -69,7 +83,11 @@ def get_file_data_with_name(file: Annotated[m_File, Depends(get_file)]) -> Respo
 
 
 @router.get("/{id}/meta")
-def get_file_meta(file: Annotated[m_File, Depends(get_file)]) -> s_FileMetadata:
+@limiter.limit("5/second", key_func=get_remote_address)
+def get_file_meta(
+        request: Request,
+        file: Annotated[m_File, Depends(get_file)]
+) -> s_FileMetadata:
     return s_FileMetadata(
         uploader_id=str(file.uploader_id) if not file.uploader_hidden else None,
         upload_datetime=file.upload_datetime,
@@ -81,7 +99,12 @@ def get_file_meta(file: Annotated[m_File, Depends(get_file)]) -> s_FileMetadata:
 
 
 @router.delete("/{id}")
-def delete_file(user: Annotated[m_User, Depends(authorize_user)], file: Annotated[m_File, Depends(get_file)]) -> None:
+@limiter.limit("5/minute")
+def delete_file(
+        request: Request,
+        user: Annotated[m_User, Depends(authorize_user)],
+        file: Annotated[m_File, Depends(get_file)]
+) -> None:
     if int(file.uploader_id) == 0:
         raise HTTPException(
             status_code=403,

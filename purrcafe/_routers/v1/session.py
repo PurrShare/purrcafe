@@ -4,9 +4,12 @@ from typing import Annotated
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi.security import OAuth2PasswordRequestForm
 from fastapi.responses import PlainTextResponse
+from slowapi.util import get_remote_address
+from starlette.requests import Request
 
 from ._common import authorize_token, authorize_user
 from ._schemas import CreateSession as s_CreateSession, Session as s_Session, OAuth2LoginInfo
+from ... import limiter
 from ..._database import User as m_User, Session as m_Session
 from ..._database.exceptions import ObjectNotFound, ValueMismatchError
 
@@ -27,7 +30,11 @@ def get_all_sessions(user: Annotated[m_User, Depends(authorize_user)]) -> list[s
 
 
 @router.post("/", response_class=PlainTextResponse)
-def login(credentials: s_CreateSession) -> str:
+@limiter.limit("20/minute", key_func=get_remote_address)
+def login(
+        request: Request,
+        credentials: s_CreateSession
+) -> str:
     try:
         return str(m_User.find(credentials.owner_name).authorize(credentials.password).id)
     except (ObjectNotFound, ValueMismatchError):
@@ -38,7 +45,11 @@ def login(credentials: s_CreateSession) -> str:
 
 
 @router.post("/oauth2")
-def login_oauth2(credentials: Annotated[OAuth2PasswordRequestForm, Depends()]) -> OAuth2LoginInfo:
+@limiter.limit("20/minute", key_func=get_remote_address)
+def login_oauth2(
+        request: Request,
+        credentials: Annotated[OAuth2PasswordRequestForm, Depends()]
+) -> OAuth2LoginInfo:
     try:
         return OAuth2LoginInfo(access_token=str(m_User.find(credentials.username).authorize(hashlib.sha3_512(credentials.password.encode('utf-8')).hexdigest()).id))
     except (ObjectNotFound, ValueMismatchError):
@@ -49,7 +60,12 @@ def login_oauth2(credentials: Annotated[OAuth2PasswordRequestForm, Depends()]) -
 
 
 @router.delete("/")
-def logout(session: Annotated[m_Session, Depends(authorize_token)]) -> None:
+@limiter.limit("20/minute")
+def logout(
+        request: Request,
+        user: Annotated[m_User, Depends(authorize_user)],
+        session: Annotated[m_Session, Depends(authorize_token)]
+) -> None:
     if int(session.id) == 0:
         raise HTTPException(
             status_code=403,
