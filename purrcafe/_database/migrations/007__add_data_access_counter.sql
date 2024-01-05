@@ -1,0 +1,2 @@
+ALTER TABLE files ADD access_count INTEGER NOT NULL DEFAULT 0;
+ALTER TABLE files ADD max_access_count INTEGER NULL;

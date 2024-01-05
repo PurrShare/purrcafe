@@ -24,6 +24,7 @@ async def upload_file(
         mime_type: Annotated[str, Header(alias="Content-Type")],
         filename: str = None,
         decrypted_data_hash: Annotated[str, Header()] = None,
+        max_access_count: Annotated[int, Header()] = None,
         anonymous: bool = False
 ) -> str:
     try:
@@ -31,9 +32,11 @@ async def upload_file(
             uploader=user,
             uploader_hidden=anonymous,
             filename=filename,
+            lifetime=m_File.DEFAULT_LIFETIME,
             data=data,
             decrypted_data_hash=decrypted_data_hash,
-            mime_type=mime_type
+            mime_type=mime_type,
+            max_access_count=max_access_count
         ).id)
     except WrongHashLengthError as e:
         raise HTTPException(
@@ -55,11 +58,18 @@ def get_file_data(
         file: Annotated[m_File, Depends(get_file)],
         t: bool = False
 ) -> Response:
-    return Response(
+    file.access_count += 1
+
+    response = Response(
         content=file.data,
         headers={'Decrypted-Data-Hash': file.decrypted_data_hash} if file.decrypted_data_hash is not None else {},
         media_type=file.mime_type if not t else 'text/plain'
     )
+
+    if file.max_access_count is not None and file.access_count + 1 > file.max_access_count:
+        file.delete()
+
+    return response
 
 
 @router.get("/{id}/n")
@@ -82,7 +92,9 @@ def get_file_meta(
         expiration_datetime=file.expiration_datetime,
         filename=file.filename,
         decrypted_data_hash=file.decrypted_data_hash,
-        mime_type=file.mime_type
+        mime_type=file.mime_type,
+        access_count=file.access_count,
+        max_access_count=file.max_access_count
     )
 
 

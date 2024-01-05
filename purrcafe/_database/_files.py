@@ -24,6 +24,8 @@ class File:
     _data: bytes | type[_Nothing]
     _decrypted_data_hash: str | None | type[_Nothing]
     _mime_type: str | type[_Nothing]
+    _access_count: int | type[_Nothing]
+    _max_access_count: int | None | type[_Nothing]
 
     @property
     def id(self) -> MeowID:
@@ -148,6 +150,38 @@ class File:
 
         self._mime_type = new_mime_type
 
+    @property
+    def access_count(self) -> int:
+        if self._access_count is _Nothing:
+            with db_l.reader:
+                self._access_count = db.execute("SELECT access_count FROM files WHERE id=(?)", (int(self.id),)).fetchone()[0]
+
+        return self._access_count
+
+    @access_count.setter
+    def access_count(self, new_access_count: int) -> None:
+        with db_l.writer:
+            db.execute("UPDATE files SET access_count=(?) WHERE id=(?)", (new_access_count, int(self.id)))
+            db.commit()
+
+        self._access_count = new_access_count
+
+    @property
+    def max_access_count(self) -> int:
+        if self._max_access_count is _Nothing:
+            with db_l.reader:
+                self._max_access_count = db.execute("SELECT max_access_count FROM files WHERE id=(?)", (int(self.id),)).fetchone()[0]
+
+        return self._max_access_count
+
+    @max_access_count.setter
+    def max_access_count(self, new_max_access_count: int) -> None:
+        with db_l.writer:
+            db.execute("UPDATE files SET max_access_count=(?) WHERE id=(?)", (new_max_access_count, int(self.id)))
+            db.commit()
+
+        self._max_access_count = new_max_access_count
+
     def __init__(
             self,
             id: MeowID | int | type[_Nothing] = _Nothing,
@@ -158,7 +192,9 @@ class File:
             filename: str | None | type[_Nothing] = _Nothing,
             data: bytes | type[_Nothing] = _Nothing,
             decrypted_data_hash: str | None | type[_Nothing] = _Nothing,
-            mime_type: str | type[_Nothing] = _Nothing
+            mime_type: str | type[_Nothing] = _Nothing,
+            access_count: int | type[_Nothing] = _Nothing,
+            max_access_count: int | None | type[_Nothing] = _Nothing
     ) -> None:
         self._id = MeowID.from_int(id) if isinstance(id, int) else id
         self._uploader_id = uploader_id
@@ -169,6 +205,8 @@ class File:
         self._data = data
         self._decrypted_data_hash = decrypted_data_hash
         self._mime_type = mime_type
+        self._access_count = access_count
+        self._max_access_count = max_access_count
 
     @classmethod
     def get(cls, id_: MeowID) -> File:
@@ -191,7 +229,7 @@ class File:
             return [cls(*file_data) for file_data in db.execute("SELECT * FROM files WHERE uploader_id=(?)", (int(uploader.id),)).fetchall()]
 
     @classmethod
-    def create(cls, uploader: User, uploader_hidden: bool, filename: str | None, data: bytes, decrypted_data_hash: str | None, mime_type: str, lifetime: datetime.timedelta | None = DEFAULT_LIFETIME) -> File:
+    def create(cls, uploader: User, uploader_hidden: bool, lifetime: datetime.timedelta | None, filename: str | None, data: bytes, decrypted_data_hash: str | None, mime_type: str, max_access_count: int | None) -> File:
         if decrypted_data_hash is not None and len(decrypted_data_hash) != cls.ENCRYPTED_DATA_HASH_LENGTH:
             raise WrongHashLengthError("encrypted data", len(decrypted_data_hash), cls.ENCRYPTED_DATA_HASH_LENGTH)
 
@@ -208,13 +246,15 @@ class File:
             filename,
             data,
             decrypted_data_hash,
-            mime_type
+            mime_type,
+            0,
+            max_access_count
         )
 
         with db_l.writer:
             db.execute(
-                "INSERT INTO files VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
-                (int(file._id), int(file._uploader_id), file._uploader_hidden, file._upload_datetime, file._expiration_datetime, file._filename, file._data, file._decrypted_data_hash, file._mime_type)
+                "INSERT INTO files VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                (int(file._id), int(file._uploader_id), file._uploader_hidden, file._upload_datetime, file._expiration_datetime, file._filename, file._data, file._decrypted_data_hash, file._mime_type, file._access_count, file._max_access_count)
             )
             db.commit()
 

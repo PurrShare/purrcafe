@@ -64,6 +64,8 @@ class FileMetadata:
     filename: str | None
     decrypted_data_hash: str | None
     mime_type: str
+    access_count: int
+    max_access_count: int | None
 
 
 @dataclass
