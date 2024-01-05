@@ -3,6 +3,7 @@ import os
 import slowapi
 from slowapi.errors import RateLimitExceeded
 from fastapi import FastAPI
+from starlette.middleware.cors import CORSMiddleware
 
 from ._middlewares import LoggingMiddleware
 from ._routers._limiting import get_request_identifier, limiter
@@ -13,6 +14,20 @@ app = FastAPI(
 )
 
 app.add_middleware(LoggingMiddleware)
+
+
+if os.environ.get('PURRCAFE_FUCK_OFF_CORS') == '1':
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=["*"],
+        allow_methods=["*"],
+        allow_headers=["*"],
+        expose_headers=["*"],
+        allow_credentials=True
+    )
+else:
+    # TODO proper cors
+    raise NotImplementedError
 
 
 app.state.limiter = limiter
