@@ -16,9 +16,9 @@ router = APIRouter()
 async def upload_file(
         data: Annotated[bytes, Body(media_type="application/octet-stream")],
         user: Annotated[m_User, Depends(authorize_user)],
-        decrypted_data_hash: Annotated[str, Header()],
         mime_type: Annotated[str, Header(alias="Content-Type")],
         filename: str = None,
+        decrypted_data_hash: Annotated[str, Header()] = None,
         anonymous: bool = False
 ) -> str:
     try:
