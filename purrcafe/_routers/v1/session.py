@@ -29,22 +29,22 @@ def get_all_sessions(user: Annotated[m_User, Depends(authorize_user)]) -> list[s
     return [str(session.id) for session in user.sessions]
 
 
-@router.post("/", response_class=PlainTextResponse)
-@limiter.limit("20/minute", key_func=get_remote_address)
-def login(
-        request: Request,
-        credentials: s_CreateSession
-) -> str:
-    try:
-        return str(m_User.find(credentials.owner_name).authorize(credentials.password).id)
-    except (ObjectNotFound, ValueMismatchError):
-        raise HTTPException(
-            status_code=401,
-            detail="user was not found or password is invalid"
-        )
+# @router.post("/", response_class=PlainTextResponse)
+# @limiter.limit("20/minute", key_func=get_remote_address)
+# def login(
+#         request: Request,
+#         credentials: s_CreateSession
+# ) -> str:
+#     try:
+#         return str(m_User.find(credentials.owner_name).authorize(credentials.password).id)
+#     except (ObjectNotFound, ValueMismatchError):
+#         raise HTTPException(
+#             status_code=401,
+#             detail="user was not found or password is invalid"
+#         )
 
 
-@router.post("/oauth2")
+@router.post("/")
 @limiter.limit("20/minute", key_func=get_remote_address)
 def login_oauth2(
         request: Request,
