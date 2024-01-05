@@ -31,8 +31,8 @@ class ForeignUser:
 @dataclass
 class CreateUser:
     name: str
-    email: str | None
     password: str
+    email: str | None = None
 
 
 @dataclass
