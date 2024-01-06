@@ -1,3 +1,4 @@
+import datetime
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, Header, HTTPException, Body
@@ -56,15 +57,28 @@ async def upload_file(
 def get_file_data(
         request: Request,
         file: Annotated[m_File, Depends(get_file)],
+        if_modified_since: Annotated[datetime.datetime, Header()] = None,
         t: bool = False
 ) -> Response:
     file.data_access_count += 1
 
-    response = Response(
-        content=file.data,
-        headers={'Decrypted-Data-Hash': file.decrypted_data_hash} if file.decrypted_data_hash is not None else {},
-        media_type=file.mime_type if not t else 'text/plain'
-    )
+    if if_modified_since is not None and if_modified_since > file.upload_datetime:
+        response = Response(
+            status_code=304
+        )
+    else:
+        response = Response(
+            content=file.data,
+            media_type=file.mime_type if not t else 'text/plain',
+        )
+
+        if file.decrypted_data_hash is not None:
+            response.headers['Decrypted-Data-Hash'] = file.decrypted_data_hash
+
+    response.headers.update({
+        'Cache-Control': "public, max-age=604800",  # TODO take into account expiration time
+        'Last-Modified': file.upload_datetime
+    })
 
     if file.max_access_count is not None and file.data_access_count + 1 > file.max_access_count:
         file.delete()
