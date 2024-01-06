@@ -67,6 +67,7 @@ def get_file_data(
 
     if response.status_code == 200:
         response.content = file.data
+        response.headers['Content-Length'] = file.file_size
 
     if file.max_access_count is not None and file.data_access_count + 1 > file.max_access_count:
         file.delete()
