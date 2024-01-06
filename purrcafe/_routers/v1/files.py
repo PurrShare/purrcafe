@@ -58,7 +58,7 @@ def get_file_data(
         file: Annotated[m_File, Depends(get_file)],
         t: bool = False
 ) -> Response:
-    file.access_count += 1
+    file.data_access_count += 1
 
     response = Response(
         content=file.data,
@@ -66,7 +66,7 @@ def get_file_data(
         media_type=file.mime_type if not t else 'text/plain'
     )
 
-    if file.max_access_count is not None and file.access_count + 1 > file.max_access_count:
+    if file.max_access_count is not None and file.data_access_count + 1 > file.max_access_count:
         file.delete()
 
     return response
@@ -86,6 +86,8 @@ def get_file_meta(
         request: Request,
         file: Annotated[m_File, Depends(get_file)]
 ) -> s_FileMetadata:
+    file.meta_access_count += 1
+
     return s_FileMetadata(
         uploader_id=str(file.uploader_id) if not file.uploader_hidden else None,
         upload_datetime=file.upload_datetime,
@@ -93,9 +95,10 @@ def get_file_meta(
         filename=file.filename,
         decrypted_data_hash=file.decrypted_data_hash,
         mime_type=file.mime_type,
-        access_count=file.access_count,
+        data_access_count=file.data_access_count,
         max_access_count=file.max_access_count,
-        file_size=file.file_size
+        file_size=file.file_size,
+        meta_access_count=file.meta_access_count
     )
 
 

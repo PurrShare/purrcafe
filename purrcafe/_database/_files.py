@@ -25,8 +25,9 @@ class File:
     _data: bytes | type[_Nothing]
     _decrypted_data_hash: str | None | type[_Nothing]
     _mime_type: str | type[_Nothing]
-    _access_count: int | type[_Nothing]
+    _data_access_count: int | type[_Nothing]
     _max_access_count: int | None | type[_Nothing]
+    _meta_access_count: int | type[_Nothing]
     _file_size: int | type[_Nothing]
 
     @property
@@ -153,23 +154,23 @@ class File:
         self._mime_type = new_mime_type
 
     @property
-    def access_count(self) -> int:
-        if self._access_count is _Nothing:
+    def data_access_count(self) -> int:
+        if self._data_access_count is _Nothing:
             with db_l.reader:
-                self._access_count = db.execute("SELECT access_count FROM files WHERE id=(?)", (int(self.id),)).fetchone()[0]
+                self._data_access_count = db.execute("SELECT data_access_count FROM files WHERE id=(?)", (int(self.id),)).fetchone()[0]
 
-        return self._access_count
+        return self._data_access_count
 
-    @access_count.setter
-    def access_count(self, new_access_count: int) -> None:
+    @data_access_count.setter
+    def data_access_count(self, new_data_access_count: int) -> None:
         with db_l.writer:
-            db.execute("UPDATE files SET access_count=(?) WHERE id=(?)", (new_access_count, int(self.id)))
+            db.execute("UPDATE files SET data_access_count=(?) WHERE id=(?)", (new_data_access_count, int(self.id)))
             db.commit()
 
-        self._access_count = new_access_count
+        self._data_access_count = new_data_access_count
 
     @property
-    def max_access_count(self) -> int:
+    def max_access_count(self) -> int | None:
         if self._max_access_count is _Nothing:
             with db_l.reader:
                 self._max_access_count = db.execute("SELECT max_access_count FROM files WHERE id=(?)", (int(self.id),)).fetchone()[0]
@@ -177,12 +178,28 @@ class File:
         return self._max_access_count
 
     @max_access_count.setter
-    def max_access_count(self, new_max_access_count: int) -> None:
+    def max_access_count(self, new_max_access_count: int | None) -> None:
         with db_l.writer:
             db.execute("UPDATE files SET max_access_count=(?) WHERE id=(?)", (new_max_access_count, int(self.id)))
             db.commit()
 
         self._max_access_count = new_max_access_count
+
+    @property
+    def meta_access_count(self) -> int:
+        if self._meta_access_count is _Nothing:
+            with db_l.reader:
+                self._meta_access_count = db.execute("SELECT meta_access_count FROM files WHERE id=(?)", (int(self.id),)).fetchone()[0]
+
+        return self._meta_access_count
+
+    @meta_access_count.setter
+    def meta_access_count(self, new_meta_access_count: int) -> None:
+        with db_l.writer:
+            db.execute("UPDATE files SET meta_access_count=(?) WHERE id=(?)", (new_meta_access_count, int(self.id)))
+            db.commit()
+
+        self._meta_access_count = new_meta_access_count
 
     @property
     def file_size(self):
@@ -203,8 +220,9 @@ class File:
             data: bytes | type[_Nothing] = _Nothing,
             decrypted_data_hash: str | None | type[_Nothing] = _Nothing,
             mime_type: str | type[_Nothing] = _Nothing,
-            access_count: int | type[_Nothing] = _Nothing,
+            data_access_count: int | type[_Nothing] = _Nothing,
             max_access_count: int | None | type[_Nothing] = _Nothing,
+            meta_access_count: int | type[_Nothing] = _Nothing,
             file_size: int | type[_Nothing] = _Nothing
     ) -> None:
         self._id = MeowID.from_int(id) if isinstance(id, int) else id
@@ -216,14 +234,15 @@ class File:
         self._data = data
         self._decrypted_data_hash = decrypted_data_hash
         self._mime_type = mime_type
-        self._access_count = access_count
+        self._data_access_count = data_access_count
         self._max_access_count = max_access_count
+        self._meta_access_count = meta_access_count
         self._file_size = file_size
 
     @classmethod
     def get(cls, id_: MeowID) -> File:
         with db_l.reader:
-            raw_data = db.execute("SELECT id, uploader_id, uploader_hidden, upload_datetime, expiration_datetime, filename, decrypted_data_hash, mime_type, access_count, max_access_count, LENGTH(data) FROM files WHERE id=(?)", (int(id_),)).fetchone()
+            raw_data = db.execute("SELECT id, uploader_id, uploader_hidden, upload_datetime, expiration_datetime, filename, decrypted_data_hash, mime_type, data_access_count, max_access_count, meta_access_count, LENGTH(data) FROM files WHERE id=(?)", (int(id_),)).fetchone()
 
         if raw_data is None:
             raise IDNotFoundError("file", id_)
@@ -240,7 +259,8 @@ class File:
             raw_data[7],
             raw_data[8],
             raw_data[9],
-            raw_data[10]
+            raw_data[10],
+            raw_data[11]
         )
 
     @classmethod
@@ -273,13 +293,14 @@ class File:
             decrypted_data_hash,
             mime_type,
             0,
-            max_access_count
+            max_access_count,
+            0
         )
 
         with db_l.writer:
             db.execute(
-                "INSERT INTO files VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-                (int(file._id), int(file._uploader_id), file._uploader_hidden, file._upload_datetime, file._expiration_datetime, file._filename, file._data, file._decrypted_data_hash, file._mime_type, file._access_count, file._max_access_count)
+                "INSERT INTO files VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                (int(file._id), int(file._uploader_id), file._uploader_hidden, file._upload_datetime, file._expiration_datetime, file._filename, file._data, file._decrypted_data_hash, file._mime_type, file._data_access_count, file._max_access_count, file._meta_access_count)
             )
             db.commit()
 
