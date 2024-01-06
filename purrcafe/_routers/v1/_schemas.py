@@ -66,6 +66,7 @@ class FileMetadata:
     mime_type: str
     access_count: int
     max_access_count: int | None
+    file_size: int
 
 
 @dataclass

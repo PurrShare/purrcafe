@@ -94,7 +94,8 @@ def get_file_meta(
         decrypted_data_hash=file.decrypted_data_hash,
         mime_type=file.mime_type,
         access_count=file.access_count,
-        max_access_count=file.max_access_count
+        max_access_count=file.max_access_count,
+        file_size=file.file_size
     )
 
 

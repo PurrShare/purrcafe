@@ -27,6 +27,7 @@ class File:
     _mime_type: str | type[_Nothing]
     _access_count: int | type[_Nothing]
     _max_access_count: int | None | type[_Nothing]
+    _file_size: int | type[_Nothing]
 
     @property
     def id(self) -> MeowID:
@@ -183,6 +184,14 @@ class File:
 
         self._max_access_count = new_max_access_count
 
+    @property
+    def file_size(self):
+        if self._file_size is _Nothing:
+            with db_l.reader:
+                self._file_size = db.execute("SELECT LENGTH(data) FROM files WHERE id=(?)", (int(self.id),)).fetchone()[0]
+
+        return self._file_size
+
     def __init__(
             self,
             id: MeowID | int | type[_Nothing] = _Nothing,
@@ -195,7 +204,8 @@ class File:
             decrypted_data_hash: str | None | type[_Nothing] = _Nothing,
             mime_type: str | type[_Nothing] = _Nothing,
             access_count: int | type[_Nothing] = _Nothing,
-            max_access_count: int | None | type[_Nothing] = _Nothing
+            max_access_count: int | None | type[_Nothing] = _Nothing,
+            file_size: int | type[_Nothing] = _Nothing
     ) -> None:
         self._id = MeowID.from_int(id) if isinstance(id, int) else id
         self._uploader_id = MeowID.from_int(uploader_id) if isinstance(uploader_id, int) else uploader_id
@@ -208,11 +218,12 @@ class File:
         self._mime_type = mime_type
         self._access_count = access_count
         self._max_access_count = max_access_count
+        self._file_size = file_size
 
     @classmethod
     def get(cls, id_: MeowID) -> File:
         with db_l.reader:
-            raw_data = db.execute("SELECT id, uploader_id, uploader_hidden, upload_datetime, expiration_datetime, filename, decrypted_data_hash, mime_type, access_count, max_access_count FROM files WHERE id=(?)", (int(id_),)).fetchone()
+            raw_data = db.execute("SELECT id, uploader_id, uploader_hidden, upload_datetime, expiration_datetime, filename, decrypted_data_hash, mime_type, access_count, max_access_count, LENGTH(data) FROM files WHERE id=(?)", (int(id_),)).fetchone()
 
         if raw_data is None:
             raise IDNotFoundError("file", id_)
@@ -228,7 +239,8 @@ class File:
             raw_data[6],
             raw_data[7],
             raw_data[8],
-            raw_data[9]
+            raw_data[9],
+            raw_data[10]
         )
 
     @classmethod
