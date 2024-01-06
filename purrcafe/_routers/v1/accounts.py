@@ -5,7 +5,7 @@ from fastapi.responses import PlainTextResponse
 from slowapi.util import get_remote_address
 from starlette.requests import Request
 
-from ._common import authorize_user
+from ._common import authorize_user, parse_meowid
 from ._schemas import CreateUser as s_CreateUser, User as s_User, ForeignUser as s_ForeignUser, UpdateUser as s_UpdateUser
 from ... import limiter
 from ..._database import User as m_User
@@ -64,7 +64,7 @@ def get_foreign_user(
         id: str
 ) -> s_ForeignUser:
     try:
-        return s_ForeignUser.from_user(get_account(m_User.get(MeowID.from_str(id))))
+        return s_ForeignUser.from_user(get_account(m_User.get(parse_meowid(id))))
     except IDNotFoundError:
         raise HTTPException(
             status_code=404,
