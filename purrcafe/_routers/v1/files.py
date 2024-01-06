@@ -95,12 +95,11 @@ def get_file_head(
             response.headers['Decrypted-Data-Hash'] = file.decrypted_data_hash
 
     response.headers.update({
-        'Cache-Control': "public, max-age=604800",  # TODO take into account expiration time
+        'Cache-Control': "public, max-age=604800" if file.max_access_count is None else "no-cache",  # TODO take into account file's expiration date for max age
         'Last-Modified': email.utils.format_datetime(file.upload_datetime)
     })
 
     return response
-
 
 
 @router.get("/{id}/n")
