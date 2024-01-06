@@ -58,7 +58,7 @@ async def upload_file(
 def get_file_data(
         request: Request,
         file: Annotated[m_File, Depends(get_file)],
-        if_modified_since: Annotated[datetime.datetime, Header()] = None,
+        if_modified_since: Annotated[str, Header()] = None,
         t: bool = False
 ) -> Response:
     file.data_access_count += 1
@@ -78,10 +78,10 @@ def get_file_data(
 @router.head("/{id}/n/{name}")
 def get_file_head(
         file: Annotated[m_File, Depends(get_file)],
-        if_modified_since: Annotated[datetime.datetime, Header()] = None,
+        if_modified_since: Annotated[str, Header()] = None,
         t: bool = False
 ) -> Response:
-    if if_modified_since is not None and if_modified_since > file.upload_datetime:
+    if if_modified_since is not None and datetime.datetime.fromisoformat(if_modified_since) > file.upload_datetime:
         response = Response(
             status_code=304
         )
