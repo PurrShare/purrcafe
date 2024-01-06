@@ -81,7 +81,7 @@ def get_file_head(
         if_modified_since: Annotated[str, Header()] = None,
         t: bool = False
 ) -> Response:
-    if if_modified_since is not None and datetime.datetime.fromisoformat(if_modified_since) > file.upload_datetime:
+    if if_modified_since is not None and email.utils.parsedate_to_datetime(if_modified_since) > file.upload_datetime:
         response = Response(
             status_code=304
         )
