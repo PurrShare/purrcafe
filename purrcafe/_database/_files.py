@@ -279,7 +279,7 @@ class File:
             raise WrongHashLengthError("decrypted data", len(decrypted_data_hash), cls.ENCRYPTED_DATA_HASH_LENGTH)
 
         if uploader.id != User.ADMIN_ID:
-            if len(data) > (max_file_size := (cls.MAX_FILE_SIZE if int(uploader.id) != User.GUEST_ID else cls.GUEST_MAX_FILE_SIZE)):
+            if len(data) > (max_file_size := (cls.MAX_FILE_SIZE if uploader.id != User.GUEST_ID else cls.GUEST_MAX_FILE_SIZE)):
                 raise WrongValueLengthError("data", "byte(s)", max_file_size, None, len(data))
 
         file = cls(
