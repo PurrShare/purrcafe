@@ -1,4 +1,5 @@
 import datetime
+import email.utils
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, Header, HTTPException, Body
@@ -77,7 +78,7 @@ def get_file_data(
 
     response.headers.update({
         'Cache-Control': "public, max-age=604800",  # TODO take into account expiration time
-        'Last-Modified': file.upload_datetime
+        'Last-Modified': email.utils.format_datetime(file.upload_datetime)
     })
 
     if file.max_access_count is not None and file.data_access_count + 1 > file.max_access_count:
