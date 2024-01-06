@@ -20,7 +20,6 @@ class MeowIDExhaustedError(MeowIDError):
     pass
 
 
-@functools.total_ordering
 class MeowID:
     TIMESTAMP_OFFSET: Final[int] = 32
     SEQUENCE_COUNT_OFFSET: Final[int] = 20
@@ -171,6 +170,15 @@ class MeowID:
 
     def __lt__(self, other: MeowID) -> bool:
         return self.timestamp < other.timestamp
+
+    def __gt__(self, other: MeowID) -> bool:
+        return self.timestamp > other.timestamp
+
+    def __le__(self, other: MeowID) -> bool:
+        return self.timestamp <= other.timestamp
+
+    def __ge__(self, other: MeowID) -> bool:
+        return self.timestamp >= other.timestamp
 
 
 def meowid_generator(count: int | None = None) -> Generator[MeowID, None, None]:
