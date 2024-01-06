@@ -10,7 +10,7 @@ from ._schemas import CreateUser as s_CreateUser, User as s_User, ForeignUser as
 from ... import limiter
 from ..._database import User as m_User
 from ..._database._database import _Nothing
-from ..._database.exceptions import WrongHashLengthError, IDNotFoundError
+from ..._database.exceptions import WrongHashLengthError, IDNotFoundError, ValueAlreadyTakenError
 from ..._utils import hash_password
 from ...meowid import MeowID
 
@@ -32,6 +32,11 @@ def create_account(
     except WrongHashLengthError as e:
         raise HTTPException(
             status_code=422,
+            detail=str(e)
+        ) from None
+    except ValueAlreadyTakenError as e:
+        raise HTTPException(
+            status_code=409,
             detail=str(e)
         ) from None
 

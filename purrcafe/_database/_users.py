@@ -7,7 +7,7 @@ import typing
 from ..meowid import MeowID
 from .._utils import verify_password
 from ._database import database as db, database_lock as db_l, _Nothing
-from .exceptions import WrongHashLengthError, IDNotFoundError, ObjectIDUnknownError, WrongValueLengthError, ValueMismatchError, ObjectNotFound, OperationPermissionError
+from .exceptions import WrongHashLengthError, IDNotFoundError, ObjectIDUnknownError, WrongValueLengthError, ValueMismatchError, ObjectNotFound, OperationPermissionError, ValueAlreadyTakenError
 if typing.TYPE_CHECKING:
     from ._sessions import Session
     from ._files import File
@@ -153,6 +153,12 @@ class User:
 
         if len(password_hash) != cls.PASSWORD_HASH_LENGTH:
             raise WrongHashLengthError("password", cls.PASSWORD_HASH_LENGTH, len(password_hash))
+
+        if cls.does_exist_by_name(name):
+            raise ValueAlreadyTakenError("name", name)
+
+        if email is not None and cls.does_exist_by_email(email):
+            raise ValueAlreadyTakenError("email", email)
 
         user = cls(
             MeowID.generate(),
