@@ -39,7 +39,7 @@ class Session:
     def creation_datetime(self) -> datetime.datetime:
         if self._creation_datetime is _Nothing:
             with db_l.reader:
-                self._creation_datetime = db.execute("SELECT creation_datetime FROM sessions WHERE id=(?)", (int(self.id),)).fetchone()[0]
+                self._creation_datetime = datetime.datetime.fromisoformat(db.execute("SELECT creation_datetime FROM sessions WHERE id=(?)", (int(self.id),)).fetchone()[0])
 
         return self._creation_datetime
 
@@ -47,7 +47,7 @@ class Session:
     def expiration_datetime(self) -> datetime.datetime | None:
         if self._expiration_datetime is _Nothing:
             with db_l.reader:
-                self._expiration_datetime = db.execute("SELECT expiration_datetime FROM sessions WHERE id=(?)", (int(self.id),)).fetchone()[0]
+                self._expiration_datetime = datetime.datetime.fromisoformat(db.execute("SELECT expiration_datetime FROM sessions WHERE id=(?)", (int(self.id),)).fetchone()[0])
 
         return self._expiration_datetime
 
@@ -66,13 +66,13 @@ class Session:
             self,
             id: MeowID | int | type[_Nothing] = _Nothing,
             owner_id: MeowID | int | type[_Nothing] = _Nothing,
-            creation_datetime: datetime.datetime | type[_Nothing] = _Nothing,
-            expiration_datetime: datetime.datetime | None | type[_Nothing] = _Nothing
+            creation_datetime: datetime.datetime | str | type[_Nothing] = _Nothing,
+            expiration_datetime: datetime.datetime | str | None | type[_Nothing] = _Nothing
     ) -> None:
         self._id = MeowID.from_int(id) if isinstance(id, int) else id
         self._owner_id = MeowID.from_int(owner_id) if isinstance(owner_id, int) else owner_id
-        self._creation_datetime = creation_datetime
-        self._expiration_datetime = expiration_datetime
+        self._creation_datetime = datetime.datetime.fromisoformat(creation_datetime) if isinstance(creation_datetime, str) else creation_datetime
+        self._expiration_datetime = datetime.datetime.fromisoformat(expiration_datetime) if isinstance(expiration_datetime, str) else expiration_datetime
 
     @classmethod
     def does_exist(cls, id: MeowID) -> bool:

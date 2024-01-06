@@ -69,15 +69,15 @@ class File:
     def upload_datetime(self) -> datetime.datetime:
         if self._upload_datetime is _Nothing:
             with db_l.reader:
-                self._upload_datetime = db.execute("SELECT upload_datetime FROM files WHERE id=(?)", (int(self.id),)).fetchone()[0]
+                self._upload_datetime = datetime.datetime.fromisoformat(db.execute("SELECT upload_datetime FROM files WHERE id=(?)", (int(self.id),)).fetchone()[0])
 
         return self._upload_datetime
 
     @property
-    def expiration_datetime(self) -> datetime.datetime | None :
+    def expiration_datetime(self) -> datetime.datetime | None:
         if self._expiration_datetime is _Nothing:
             with db_l.reader:
-                self._expiration_datetime = db.execute("SELECT expiration_datetime FROM files WHERE id=(?)", (int(self.id),)).fetchone()[0]
+                self._expiration_datetime = datetime.datetime.fromisoformat(db.execute("SELECT expiration_datetime FROM files WHERE id=(?)", (int(self.id),)).fetchone()[0])
 
         return self._expiration_datetime
 
@@ -214,8 +214,8 @@ class File:
             id: MeowID | int | type[_Nothing] = _Nothing,
             uploader_id: MeowID | int | type[_Nothing] = _Nothing,
             uploader_hidden: bool | type[_Nothing] = _Nothing,
-            upload_datetime: datetime.datetime | type[_Nothing] = _Nothing,
-            expiration_datetime: datetime.datetime | type[_Nothing] = _Nothing,
+            upload_datetime: datetime.datetime | str | type[_Nothing] = _Nothing,
+            expiration_datetime: datetime.datetime | str | type[_Nothing] = _Nothing,
             filename: str | None | type[_Nothing] = _Nothing,
             data: bytes | type[_Nothing] = _Nothing,
             decrypted_data_hash: str | None | type[_Nothing] = _Nothing,
@@ -228,8 +228,8 @@ class File:
         self._id = MeowID.from_int(id) if isinstance(id, int) else id
         self._uploader_id = MeowID.from_int(uploader_id) if isinstance(uploader_id, int) else uploader_id
         self._uploader_hidden = uploader_hidden
-        self._upload_datetime = upload_datetime
-        self._expiration_datetime = expiration_datetime
+        self._upload_datetime = datetime.datetime.fromisoformat(upload_datetime) if isinstance(upload_datetime, str) else upload_datetime
+        self._expiration_datetime = datetime.datetime.fromisoformat(expiration_datetime) if isinstance(expiration_datetime, str) else expiration_datetime
         self._filename = filename
         self._data = data
         self._decrypted_data_hash = decrypted_data_hash

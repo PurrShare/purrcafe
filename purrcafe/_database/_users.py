@@ -100,7 +100,7 @@ class User:
     def creation_datetime(self):
         if self._creation_datetime is _Nothing:
             with db_l.reader:
-                self._creation_datetime = db.execute("SELECT creation_datetime FROM users WHERE id=(?)", (int(self.id),)).fetchone()[0]
+                self._creation_datetime = datetime.datetime.fromisoformat(db.execute("SELECT creation_datetime FROM users WHERE id=(?)", (int(self.id),)).fetchone()[0])
 
         return self._creation_datetime
 
@@ -128,7 +128,7 @@ class User:
         self._name = name
         self._email = email
         self._password_hash = password_hash
-        self._creation_datetime = creation_datetime
+        self._creation_datetime = datetime.datetime.fromisoformat(creation_datetime) if isinstance(creation_datetime, str) else creation_datetime
 
     @classmethod
     def does_exist(cls, id: MeowID) -> bool:
