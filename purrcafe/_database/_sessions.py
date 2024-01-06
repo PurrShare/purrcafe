@@ -27,7 +27,7 @@ class Session:
     def owner_id(self) -> MeowID:
         if self._owner_id is _Nothing:
             with db_l.reader:
-                self._owner_id = db.execute("SELECT owner_id FROM sessions WHERE id=(?)", (int(self.id),)).fetchone()[0]
+                self._owner_id = MeowID.from_int(db.execute("SELECT owner_id FROM sessions WHERE id=(?)", (int(self.id),)).fetchone()[0])
 
         return self._owner_id
 

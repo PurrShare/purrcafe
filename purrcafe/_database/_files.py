@@ -39,7 +39,7 @@ class File:
     def uploader_id(self) -> MeowID:
         if self._uploader_id is _Nothing:
             with db_l.reader:
-                self._uploader_id = db.execute("SELECT uploader_id FROM files WHERE id=(?)", (int(self.id),)).fetchone()[0]
+                self._uploader_id = MeowID.from_int(db.execute("SELECT uploader_id FROM files WHERE id=(?)", (int(self.id),)).fetchone()[0])
 
         return self._uploader_id
 
