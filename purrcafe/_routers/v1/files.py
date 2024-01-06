@@ -88,7 +88,7 @@ def get_file_head(
     else:
         response = Response(
             media_type=file.mime_type if not t else 'text/plain',
-            headers={'Content-Length': file.file_size}
+            headers={'Content-Length': str(file.file_size)}
         )
 
         if file.decrypted_data_hash is not None:
