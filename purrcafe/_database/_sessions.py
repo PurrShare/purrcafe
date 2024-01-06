@@ -65,12 +65,12 @@ class Session:
     def __init__(
             self,
             id: MeowID | int | type[_Nothing] = _Nothing,
-            owner_id: MeowID | type[_Nothing] = _Nothing,
+            owner_id: MeowID | int | type[_Nothing] = _Nothing,
             creation_datetime: datetime.datetime | type[_Nothing] = _Nothing,
             expiration_datetime: datetime.datetime | None | type[_Nothing] = _Nothing
     ) -> None:
         self._id = MeowID.from_int(id) if isinstance(id, int) else id
-        self._owner_id = owner_id
+        self._owner_id = MeowID.from_int(owner_id) if isinstance(owner_id, int) else owner_id
         self._creation_datetime = creation_datetime
         self._expiration_datetime = expiration_datetime
 

@@ -186,7 +186,7 @@ class File:
     def __init__(
             self,
             id: MeowID | int | type[_Nothing] = _Nothing,
-            uploader_id: MeowID | type[_Nothing] = _Nothing,
+            uploader_id: MeowID | int | type[_Nothing] = _Nothing,
             uploader_hidden: bool | type[_Nothing] = _Nothing,
             upload_datetime: datetime.datetime | type[_Nothing] = _Nothing,
             expiration_datetime: datetime.datetime | type[_Nothing] = _Nothing,
@@ -198,7 +198,7 @@ class File:
             max_access_count: int | None | type[_Nothing] = _Nothing
     ) -> None:
         self._id = MeowID.from_int(id) if isinstance(id, int) else id
-        self._uploader_id = uploader_id
+        self._uploader_id = MeowID.from_int(uploader_id) if isinstance(uploader_id, int) else uploader_id
         self._uploader_hidden = uploader_hidden
         self._upload_datetime = upload_datetime
         self._expiration_datetime = expiration_datetime
