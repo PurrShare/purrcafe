@@ -212,17 +212,29 @@ class File:
     @classmethod
     def get(cls, id_: MeowID) -> File:
         with db_l.reader:
-            raw_data = db.execute("SELECT * FROM files WHERE id=(?)", (int(id_),)).fetchone()
+            raw_data = db.execute("SELECT id, uploader_id, uploader_hidden, upload_datetime, expiration_datetime, filename, decrypted_data_hash, mime_type, access_count, max_access_count FROM files WHERE id=(?)", (int(id_),)).fetchone()
 
         if raw_data is None:
             raise IDNotFoundError("file", id_)
 
-        return cls(*raw_data)
+        return cls(
+            raw_data[0],
+            raw_data[1],
+            raw_data[2],
+            raw_data[3],
+            raw_data[4],
+            raw_data[5],
+            _Nothing,
+            raw_data[6],
+            raw_data[7],
+            raw_data[8],
+            raw_data[9]
+        )
 
     @classmethod
     def get_all(cls) -> list[File]:
         with db_l.reader:
-            return [cls(*file_data) for file_data in db.execute("SELECT * FROM files").fetchall()]
+            return [cls(file_id) for file_id in map(lambda q: q[0], db.execute("SELECT id FROM files").fetchall())]
 
     @classmethod
     def get_uploaded_by(cls, uploader: User) -> list[File]:
