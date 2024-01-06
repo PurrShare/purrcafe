@@ -75,6 +75,11 @@ class Session:
         self._expiration_datetime = expiration_datetime
 
     @classmethod
+    def does_exist(cls, id: MeowID) -> bool:
+        with db_l.reader:
+            return db.execute("SELECT id FROM sessions WHERE id=(?)", (int(id),)).fetchone() is not None
+
+    @classmethod
     def get(cls, id_: MeowID) -> Session:
         with db_l.reader:
             raw_data = db.execute("SELECT * FROM sessions WHERE id=(?)", (int(id_),)).fetchone()

@@ -131,6 +131,21 @@ class User:
         self._creation_datetime = creation_datetime
 
     @classmethod
+    def does_exist(cls, id: MeowID) -> bool:
+        with db_l.reader:
+            return db.execute("SELECT id FROM users WHERE id=(?)", (int(id),)).fetchone() is not None
+
+    @classmethod
+    def does_exist_by_name(cls, name: str) -> bool:
+        with db_l.reader:
+            return db.execute("SELECT name FROM users WHERE name=(?)", (name,)).fetchone() is not None
+
+    @classmethod
+    def does_exist_by_email(cls, email: str) -> bool:
+        with db_l.reader:
+            return db.execute("SELECT email FROM users WHERE email=(?)", (email,)).fetchone() is not None
+
+    @classmethod
     def create(cls, name: str, email: str | None, password_hash: str | None) -> User:
         # TODO somehow remove the need to duplicate the checks
         if len(name) > cls.NAME_MAX_LENGTH:

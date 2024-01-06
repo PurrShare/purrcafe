@@ -240,6 +240,11 @@ class File:
         self._file_size = file_size
 
     @classmethod
+    def does_exist(cls, id: MeowID) -> bool:
+        with db_l.reader:
+            return db.execute("SELECT id FROM files WHERE id=(?)", (int(id),)).fetchone() is not None
+
+    @classmethod
     def get(cls, id_: MeowID) -> File:
         with db_l.reader:
             raw_data = db.execute("SELECT id, uploader_id, uploader_hidden, upload_datetime, expiration_datetime, filename, decrypted_data_hash, mime_type, data_access_count, max_access_count, meta_access_count, LENGTH(data) FROM files WHERE id=(?)", (int(id_),)).fetchone()
