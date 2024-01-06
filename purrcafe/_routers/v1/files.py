@@ -63,14 +63,32 @@ def get_file_data(
 ) -> Response:
     file.data_access_count += 1
 
+    response = get_file_head(file, if_modified_since, t)
+
+    if response.status_code == 200:
+        response.content = file.data
+
+    if file.max_access_count is not None and file.data_access_count + 1 > file.max_access_count:
+        file.delete()
+
+    return response
+
+
+@router.head("/{id}")
+@router.head("/{id}/n/{name}")
+def get_file_head(
+        file: Annotated[m_File, Depends(get_file)],
+        if_modified_since: Annotated[datetime.datetime, Header()] = None,
+        t: bool = False
+) -> Response:
     if if_modified_since is not None and if_modified_since > file.upload_datetime:
         response = Response(
             status_code=304
         )
     else:
         response = Response(
-            content=file.data,
             media_type=file.mime_type if not t else 'text/plain',
+            headers={'Content-Length': file.file_size}
         )
 
         if file.decrypted_data_hash is not None:
@@ -81,10 +99,8 @@ def get_file_data(
         'Last-Modified': email.utils.format_datetime(file.upload_datetime)
     })
 
-    if file.max_access_count is not None and file.data_access_count + 1 > file.max_access_count:
-        file.delete()
-
     return response
+
 
 
 @router.get("/{id}/n")
