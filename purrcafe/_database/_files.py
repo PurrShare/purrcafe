@@ -227,7 +227,7 @@ class File:
     @classmethod
     def get_uploaded_by(cls, uploader: User) -> list[File]:
         with db_l.reader:
-            return [cls(*file_data) for file_data in db.execute("SELECT * FROM files WHERE uploader_id=(?)", (int(uploader.id),)).fetchall()]
+            return [cls(file_id) for file_id in map(lambda q: q[0], db.execute("SELECT id FROM files WHERE uploader_id=(?)", (int(uploader.id),)).fetchall())]
 
     @classmethod
     def create(cls, uploader: User, uploader_hidden: bool, lifetime: datetime.timedelta | None, filename: str | None, data: bytes, decrypted_data_hash: str | None, mime_type: str, max_access_count: int | None) -> File:

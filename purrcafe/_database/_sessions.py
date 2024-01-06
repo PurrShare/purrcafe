@@ -92,7 +92,7 @@ class Session:
     @classmethod
     def get_owned_by(cls, owner: User) -> list[Session]:
         with db_l.reader:
-            return [cls(*session_data) for session_data in db.execute("SELECT * FROM sessions WHERE owner_id=(?)", (int(owner.id),)).fetchall()]
+            return [cls(session_id) for session_id in map(lambda q: q[0], db.execute("SELECT id FROM sessions WHERE owner_id=(?)", (int(owner.id),)).fetchall())]
 
     @classmethod
     def create(cls, owner: User, lifetime: datetime.timedelta | None = DEFAULT_LIFETIME) -> Session:
