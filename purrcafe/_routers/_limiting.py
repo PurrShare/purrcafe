@@ -4,8 +4,8 @@ import slowapi
 from slowapi.util import get_remote_address
 from starlette.requests import Request
 
-from purrcafe._database import User
-from purrcafe._routers.v1._common import authorize_user, _oauth2_scheme, authorize_token
+from .._database import User
+from .._routers.v1._common import authorize_user, authorize_token
 
 
 def _jesus_christ_pls_somebody_kill_fastapi_devs_putting_async_in_VERY_unnecessary_places_thx(request: Request) -> str | None:

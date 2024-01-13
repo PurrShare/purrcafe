@@ -161,12 +161,15 @@ class MeowID:
     def __str__(self) -> str:
         return f"{self.timestamp_s:0>8x}-{self.sequence_count:0>3x}-{self.salt:0>5x}"
 
-    def __eq__(self, other: MeowID) -> bool:
-        return (
-            self.timestamp == other.timestamp and
-            self.sequence_count == other.sequence_count and
-            self.salt == other.salt
-        )
+    def __eq__(self, other: MeowID | int) -> bool:
+        if isinstance(other, int):
+            return self == self.from_int(other)
+        else:
+            return (
+                self.timestamp == other.timestamp and
+                self.sequence_count == other.sequence_count and
+                self.salt == other.salt
+            )
 
     def __lt__(self, other: MeowID) -> bool:
         return self.timestamp < other.timestamp

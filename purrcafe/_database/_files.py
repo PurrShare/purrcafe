@@ -13,8 +13,8 @@ class File:
     DEFAULT_LIFETIME: Final[datetime.timedelta] = datetime.timedelta(days=7)
     DEFAULT_CONTENT_TYPE: Final[str] = "application/octet-stream"
     ENCRYPTED_DATA_HASH_LENGTH: Final[int] = 32
-    GUEST_MAX_FILE_SIZE: Final[int] = os.environ.get('PURRCAFE_MAXSIZE_GUEST', 20971520)  # 20 MiB
-    MAX_FILE_SIZE = os.environ.get('PURRCAFE_MAXSIZE', 31457280)  # 30 MiB
+    GUEST_MAX_FILE_SIZE: Final[int] = int(os.environ.get('PURRCAFE_MAXSIZE_GUEST', 20971520))  # 20 MiB
+    MAX_FILE_SIZE = int(os.environ.get('PURRCAFE_MAXSIZE', 31457280))  # 30 MiB
 
     _id: MeowID | type[_Nothing]
     _uploader_id: MeowID | type[_Nothing]

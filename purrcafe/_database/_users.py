@@ -181,7 +181,7 @@ class User:
 
         if (
             (self.password_hash is not None and verify_password(password, self.password_hash)) or
-            (int(self.id) == self.ADMIN_ID and (admin_password := os.environ.get('PURRCAFE_ADMIN_PASSWORD')) is not None and password == admin_password)
+            (self.id == self.ADMIN_ID and (admin_password := os.environ.get('PURRCAFE_ADMIN_PASSWORD')) is not None and password == admin_password)
         ):
             raise ValueMismatchError("password", None, None)
 
