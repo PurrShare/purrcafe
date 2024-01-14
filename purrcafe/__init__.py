@@ -18,7 +18,7 @@ app.add_middleware(LoggingMiddleware)
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["localhost", "127.0.0.1", ("*" if os.environ.get('PURRCAFE_FUCK_OFF_CORS') == '1' else os.environ.get('PURRCAFE_ORIGIN', "purrshare.net"))],
+    allow_origins=["http://localhost:5173", ("*" if os.environ.get('PURRCAFE_FUCK_OFF_CORS') == '1' else os.environ.get('PURRCAFE_ORIGIN', "https://purrshare.net"))],
     allow_methods=["*"],
     allow_headers=["*"],
     expose_headers=["*"],
