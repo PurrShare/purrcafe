@@ -1,5 +1,6 @@
 from __future__ import annotations
 import datetime
+import logging
 import os
 from typing import Final
 
@@ -315,3 +316,12 @@ class File:
         with db_l.writer:
             db.execute("DELETE FROM files WHERE id=(?)", (int(self.id),))
             db.commit()
+
+    def is_expired(self) -> bool:
+        return datetime.datetime.now(datetime.UTC) > self.expiration_datetime
+
+    @classmethod
+    def delete_all_expired(cls) -> None:
+        for file in cls.get_all():
+            if file.is_expired():
+                file.delete()

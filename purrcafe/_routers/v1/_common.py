@@ -41,9 +41,17 @@ def authorize_user(session: Annotated[m_Session, Depends(authorize_token)]) -> m
 
 def get_file(id: str) -> m_File:
     try:
-        return m_File.get(parse_meowid(id))
+        file = m_File.get(parse_meowid(id))
     except IDNotFoundError:
         raise HTTPException(
             status_code=404,
             detail="file was not found"
         )
+    else:
+        if file.is_expired():
+            file.delete()
+
+            raise HTTPException(
+                status_code=404,
+                detail="file was not found"
+            )

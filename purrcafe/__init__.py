@@ -5,6 +5,7 @@ from slowapi.errors import RateLimitExceeded
 from fastapi import FastAPI
 from starlette.middleware.cors import CORSMiddleware
 
+from . import _background as background
 from ._middlewares import LoggingMiddleware
 from ._routers._limiting import get_request_identifier, limiter
 from ._routers.v1 import router as v1_api
@@ -31,3 +32,6 @@ app.add_exception_handler(RateLimitExceeded, slowapi._rate_limit_exceeded_handle
 
 
 app.include_router(v1_api, prefix="/v1")
+
+
+background.start_jobs()
