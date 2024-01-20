@@ -129,4 +129,4 @@ class ValueMismatchError[T](DatabaseInvalidValue):
         self.given = given
 
     def __str__(self) -> str:
-        return f"{self.name} was expected to be {self.expected or "a different value"}{f", but is {self.given}" if self.given is not None else ''}"
+        return f"{self.name} was expected to be {self.expected if self.expected is not None else "a different value"}{f", but is {self.given}" if self.given is not None else ''}"
