@@ -55,3 +55,5 @@ def get_file(id: str) -> m_File:
                 status_code=404,
                 detail="file was not found"
             )
+
+        return file
