@@ -1,3 +1,4 @@
+import datetime
 import email.utils
 from typing import Annotated
 
@@ -26,14 +27,44 @@ async def upload_file(
         filename: str = None,
         decrypted_data_hash: Annotated[str, Header()] = None,
         max_access_count: Annotated[int, Header()] = None,
+        expiration_datetime: Annotated[str, Header()] = None,
+        life_time: Annotated[int, Header()] = None,
         anonymous: bool = False
 ) -> str:
+    if expiration_datetime is not None and life_time is not None:
+        raise HTTPException(
+            status_code=422,
+            detail="headers 'Expiration-Datetime' and 'Life-Time' are mutually exclusive"
+        )
+
+    try:
+        if life_time is not None:
+            computed_lifetime = datetime.timedelta(seconds=life_time)
+        elif expiration_datetime is not None:
+            computed_lifetime = email.utils.parsedate_to_datetime(expiration_datetime)
+        else:
+            computed_lifetime = m_File.DEFAULT_GUEST_LIFETIME if user.id == m_User.GUEST_ID else m_File.DEFAULT_LIFETIME
+    except OverflowError:
+        raise HTTPException(
+            status_code=400,
+            detail="computed lifetime is actually too freaking huge"
+        ) from None
+
+    if (
+            (user.id == m_User.GUEST_ID and computed_lifetime > m_File.DEFAULT_GUEST_LIFETIME) or
+            (user.id != m_User.ADMIN_ID and computed_lifetime > m_File.DEFAULT_LIFETIME)
+    ):
+        raise HTTPException(
+            status_code=400,
+            detail="file's lifetime is too long"
+        )
+
     try:
         return str(m_File.create(
             uploader=user,
             uploader_hidden=anonymous,
             filename=filename,
-            lifetime=m_File.DEFAULT_GUEST_LIFETIME if user.id == m_User.GUEST_ID else m_File.DEFAULT_LIFETIME,
+            lifetime=computed_lifetime,
             data=data,
             decrypted_data_hash=decrypted_data_hash,
             mime_type=mime_type,
