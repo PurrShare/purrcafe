@@ -33,7 +33,7 @@ async def upload_file(
             uploader=user,
             uploader_hidden=anonymous,
             filename=filename,
-            lifetime=m_File.DEFAULT_LIFETIME,
+            lifetime=m_File.DEFAULT_GUEST_LIFETIME if user.id == m_User.GUEST_ID else m_File.DEFAULT_LIFETIME,
             data=data,
             decrypted_data_hash=decrypted_data_hash,
             mime_type=mime_type,

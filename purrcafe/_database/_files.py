@@ -1,6 +1,5 @@
 from __future__ import annotations
 import datetime
-import logging
 import os
 from typing import Final
 
@@ -11,11 +10,12 @@ from ..meowid import MeowID
 
 
 class File:
-    DEFAULT_LIFETIME: Final[datetime.timedelta] = datetime.timedelta(days=7)
+    DEFAULT_GUEST_LIFETIME: Final[datetime.timedelta] = datetime.timedelta(days=3)
+    DEFAULT_LIFETIME: Final[datetime.timedelta] = datetime.timedelta(weeks=2)
     DEFAULT_CONTENT_TYPE: Final[str] = "application/octet-stream"
     ENCRYPTED_DATA_HASH_LENGTH: Final[int] = 32
-    GUEST_MAX_FILE_SIZE: Final[int] = int(os.environ.get('PURRCAFE_MAXSIZE_GUEST', 20971520))  # 20 MiB
-    MAX_FILE_SIZE = int(os.environ.get('PURRCAFE_MAXSIZE', 31457280))  # 30 MiB
+    GUEST_MAX_FILE_SIZE: Final[int] = int(os.environ.get('PURRCAFE_MAXSIZE_GUEST', 31457280))  # 30 MiB
+    MAX_FILE_SIZE = int(os.environ.get('PURRCAFE_MAXSIZE', 73400320))  # 70 MiB
 
     _id: MeowID | type[_Nothing]
     _uploader_id: MeowID | type[_Nothing]
