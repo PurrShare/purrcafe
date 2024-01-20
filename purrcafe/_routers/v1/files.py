@@ -10,7 +10,7 @@ from ._common import authorize_user, get_file
 from ._schemas import FileMetadata as s_FileMetadata
 from ... import limiter
 from ..._database import File as m_File, User as m_User
-from ..._database.exceptions import WrongHashLengthError, WrongValueLengthError
+from ..._database.exceptions import WrongHashLengthError, WrongValueLengthError, ValueMismatchError
 
 router = APIRouter()
 
@@ -47,6 +47,11 @@ async def upload_file(
     except WrongValueLengthError as e:
         raise HTTPException(
             status_code=413,
+            detail=str(e)
+        ) from None
+    except ValueMismatchError as e:
+        raise HTTPException(
+            status_code=412,
             detail=str(e)
         ) from None
 

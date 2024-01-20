@@ -5,7 +5,7 @@ from typing import Final
 
 from . import User
 from ._database import _Nothing, database as db, database_lock as db_l
-from .exceptions import WrongHashLengthError, IDNotFoundError, ObjectIDUnknownError, WrongValueLengthError, OperationPermissionError
+from .exceptions import WrongHashLengthError, IDNotFoundError, ObjectIDUnknownError, WrongValueLengthError, ValueMismatchError
 from ..meowid import MeowID
 
 
@@ -281,6 +281,9 @@ class File:
 
     @classmethod
     def create(cls, uploader: User, uploader_hidden: bool, lifetime: datetime.timedelta | None, filename: str | None, data: bytes, decrypted_data_hash: str | None, mime_type: str, max_access_count: int | None) -> File:
+        if uploader.id == User.GUEST_ID and uploader_hidden:
+            raise ValueMismatchError("anonymous upload", False, uploader_hidden)
+
         if decrypted_data_hash is not None and len(decrypted_data_hash) != cls.ENCRYPTED_DATA_HASH_LENGTH:
             raise WrongHashLengthError("decrypted data", len(decrypted_data_hash), cls.ENCRYPTED_DATA_HASH_LENGTH)
 
