@@ -33,13 +33,13 @@ class ForeignUser:
 class CreateUser:
     name: str
     password: str
-    email: str | None = None
+    email: str = None
 
 
 @dataclass
 class UpdateUser:
     name: str = _Nothing
-    email: str | None = _Nothing
+    email: str = _Nothing
     password: str = _Nothing
 
 
