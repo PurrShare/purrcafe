@@ -138,7 +138,7 @@ def delete_file(
         user: Annotated[m_User, Depends(authorize_user)],
         file: Annotated[m_File, Depends(get_file)]
 ) -> None:
-    if int(file.uploader_id) == 0:
+    if file.uploader_id == m_User.GUEST_ID:
         raise HTTPException(
             status_code=403,
             detail="cannot delete file uploaded by guest user"
