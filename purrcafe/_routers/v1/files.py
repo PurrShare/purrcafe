@@ -42,8 +42,10 @@ async def upload_file(
             computed_lifetime = datetime.timedelta(seconds=life_time)
         elif expiration_datetime is not None:
             computed_lifetime = email.utils.parsedate_to_datetime(expiration_datetime)
-        else:
+        elif user.id != m_User.ADMIN_ID:
             computed_lifetime = m_File.DEFAULT_GUEST_LIFETIME if user.id == m_User.GUEST_ID else m_File.DEFAULT_LIFETIME
+        else:
+            computed_lifetime = None
     except OverflowError:
         raise HTTPException(
             status_code=400,
@@ -51,6 +53,7 @@ async def upload_file(
         ) from None
 
     if (
+            computed_lifetime is not None and
             (user.id == m_User.GUEST_ID and computed_lifetime > m_File.DEFAULT_GUEST_LIFETIME) or
             (user.id != m_User.ADMIN_ID and computed_lifetime > m_File.DEFAULT_LIFETIME)
     ):

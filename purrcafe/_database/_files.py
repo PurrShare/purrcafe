@@ -322,7 +322,7 @@ class File:
             db.commit()
 
     def is_expired(self) -> bool:
-        return datetime.datetime.now(datetime.UTC) > self.expiration_datetime
+        return self.expiration_datetime is not None and datetime.datetime.now(datetime.UTC) > self.expiration_datetime
 
     @classmethod
     def delete_all_expired(cls) -> None:
