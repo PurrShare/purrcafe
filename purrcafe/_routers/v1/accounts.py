@@ -73,6 +73,20 @@ def get_foreign_user(
     return s_ForeignUser.from_user(user)
 
 
+@router.get("/{id}/full")
+def get_full_user(
+        user: Annotated[m_User, Depends(authorize_user)],
+        targeted_user: Annotated[m_User, Depends(get_user)],
+) -> s_User:
+    if user.id != m_User.ADMIN_ID:
+        raise HTTPException(
+            status_code=403,
+            detail="only admins can get full user data"
+        )
+
+    return get_account(targeted_user)
+
+
 @router.patch("/me")
 @limiter.limit("20/minute")
 def update_account(
