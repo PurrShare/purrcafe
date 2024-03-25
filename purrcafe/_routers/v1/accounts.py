@@ -7,12 +7,13 @@ from starlette.requests import Request
 
 from meowid import MeowID
 
-from ._common import authorize_user, parse_meowid
+from ._common import authorize_user, parse_meowid, get_user
 from ._schemas import CreateUser as s_CreateUser, User as s_User, ForeignUser as s_ForeignUser, UpdateUser as s_UpdateUser
 from ... import limiter
 from ..._database import User as m_User
 from ..._database._database import _Nothing
-from ..._database.exceptions import WrongHashLengthError, IDNotFoundError, ValueAlreadyTakenError
+from ..._database.exceptions import WrongHashLengthError, IDNotFoundError, ValueAlreadyTakenError, \
+    OperationPermissionError
 from ..._utils import hash_password
 
 router = APIRouter()
@@ -67,15 +68,9 @@ def get_uploaded_files(user: Annotated[m_User, Depends(authorize_user)]) -> list
 @limiter.limit("1/second", key_func=get_remote_address)
 def get_foreign_user(
         request: Request,
-        id: str
+        user: Annotated[m_User, Depends(get_user)]
 ) -> s_ForeignUser:
-    try:
-        return s_ForeignUser.from_user(get_account(m_User.get(parse_meowid(id))))
-    except IDNotFoundError:
-        raise HTTPException(
-            status_code=404,
-            detail="such user was not found"
-        )
+    return s_ForeignUser.from_user(user)
 
 
 @router.patch("/me")
@@ -107,10 +102,25 @@ def delete_account(
         request: Request,
         user: Annotated[m_User, Depends(authorize_user)]
 ) -> None:
-    if int(user.id) == 0:
+    try:
+        user.delete()
+    except OperationPermissionError as err:
         raise HTTPException(
             status_code=403,
-            detail="cannot delete guest user"
+            detail=str(err)
         )
 
-    user.delete()
+
+@router.delete("/{id}")
+def delete_arbitrary_account(
+        request: Request,
+        user: Annotated[m_User, Depends(authorize_user)],
+        user_to_delete: Annotated[m_User, Depends(get_user)],
+) -> None:
+    if user.id != m_User.ADMIN_ID:
+        raise HTTPException(
+            status_code=403,
+            detail="only admins can delete arbitrary account"
+        )
+
+    delete_account(request, user_to_delete)

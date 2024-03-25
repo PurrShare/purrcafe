@@ -36,6 +36,16 @@ def authorize_token(token: Annotated[str | None, Depends(_oauth2_scheme)]) -> m_
         ) from None
 
 
+def get_user(id: str) -> m_User:
+    try:
+        return m_User.get(parse_meowid(id))
+    except IDNotFoundError as err:
+        raise HTTPException(
+            status_code=404,
+            detail=str(err)
+        )
+
+
 def authorize_user(session: Annotated[m_Session, Depends(authorize_token)]) -> m_User:
     return session.owner
 

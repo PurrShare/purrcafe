@@ -188,6 +188,10 @@ class User:
 
         return Session.create(self, lifetime)
 
+    @property
+    def is_critical(self) -> bool:
+        return self.id in (self.ADMIN_ID, self.GUEST_ID)
+
     @classmethod
     def get(cls, id_: MeowID) -> User:
         with db_l.reader:
@@ -214,8 +218,8 @@ class User:
         return cls(*raw_data)
 
     def delete(self) -> None:
-        if int(self.id) == 0:
-            raise OperationPermissionError("deletion of guest user")
+        if self.is_critical:
+            raise OperationPermissionError("deletion of a critical user")
 
         for session in self.sessions:
             session.delete()
