@@ -11,8 +11,8 @@ from .exceptions import WrongHashLengthError, IDNotFoundError, ObjectIDUnknownEr
 
 
 class File:
-    DEFAULT_GUEST_LIFETIME: Final[datetime.timedelta] = datetime.timedelta(days=3)
-    DEFAULT_LIFETIME: Final[datetime.timedelta] = datetime.timedelta(weeks=2)
+    DEFAULT_GUEST_LIFETIME: Final[datetime.timedelta] = datetime.timedelta(weeks=1)
+    DEFAULT_LIFETIME: Final[datetime.timedelta] = datetime.timedelta(weeks=4)
     DEFAULT_CONTENT_TYPE: Final[str] = "application/octet-stream"
     ENCRYPTED_DATA_HASH_LENGTH: Final[int] = 32
     GUEST_MAX_FILE_SIZE: Final[int] = int(os.environ.get('PURRCAFE_MAXSIZE_GUEST', 31457280))  # 30 MiB
