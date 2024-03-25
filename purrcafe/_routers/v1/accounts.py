@@ -80,10 +80,10 @@ def update_account(
         user: Annotated[m_User, Depends(authorize_user)],
         patch: s_UpdateUser
 ) -> None:
-    if int(user.id) == 0:
+    if user.is_critical:
         raise HTTPException(
             status_code=403,
-            detail="cannot patch guest user"
+            detail="cannot patch critical users"
         )
 
     if patch.name is not _Nothing:
@@ -94,6 +94,21 @@ def update_account(
 
     if patch.password is not _Nothing:
         user.password_hash = hash_password(patch.password)
+
+
+@router.patch("/{id}")
+def update_arbitrary_account(
+        request: Request,
+        user: Annotated[m_User, Depends(authorize_user)],
+        targeted_user: Annotated[m_User, Depends(get_user)],
+) -> None:
+    if user.id != m_User.ADMIN_ID:
+        raise HTTPException(
+            status_code=403,
+            detail="only admins can update arbitrary account"
+        )
+
+    update_account(request, targeted_user)
 
 
 @router.delete("/me")
@@ -115,7 +130,7 @@ def delete_account(
 def delete_arbitrary_account(
         request: Request,
         user: Annotated[m_User, Depends(authorize_user)],
-        user_to_delete: Annotated[m_User, Depends(get_user)],
+        targeted_user: Annotated[m_User, Depends(get_user)],
 ) -> None:
     if user.id != m_User.ADMIN_ID:
         raise HTTPException(
@@ -123,4 +138,4 @@ def delete_arbitrary_account(
             detail="only admins can delete arbitrary account"
         )
 
-    delete_account(request, user_to_delete)
+    delete_account(request, targeted_user)
