@@ -64,6 +64,20 @@ def get_uploaded_files(user: Annotated[m_User, Depends(authorize_user)]) -> list
     return [str(file.id) for file in user.uploaded_files]
 
 
+@router.get("/{id}/files")
+def get_uploaded_files_of_arbitriary_account(
+        user: Annotated[m_User, Depends(authorize_user)],
+        targeted_user: Annotated[m_User, Depends(get_user)],
+) -> list[str]:
+    if user.id != m_User.ADMIN_ID:
+        raise HTTPException(
+            status_code=403,
+            detail="only admins can view uploaded files of arbitrary user",
+        )
+
+    return get_uploaded_files(targeted_user)
+
+
 @router.get("/{id}")
 @limiter.limit("1/second", key_func=get_remote_address)
 def get_foreign_user(
