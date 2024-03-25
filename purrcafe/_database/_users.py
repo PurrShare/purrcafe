@@ -194,7 +194,7 @@ class User:
             raw_data = db.execute("SELECT * FROM users WHERE id=(?)", (int(id_),)).fetchone()
 
         if raw_data is None:
-            raise IDNotFoundError("session", id_)
+            raise IDNotFoundError("user", id_)
 
         return cls(*raw_data)
 
