@@ -4,7 +4,8 @@ import os
 from typing import Final
 import typing
 
-from ..meowid import MeowID
+from meowid import MeowID
+
 from .._utils import verify_password
 from ._database import database as db, database_lock as db_l, _Nothing
 from .exceptions import WrongHashLengthError, IDNotFoundError, ObjectIDUnknownError, WrongValueLengthError, ValueMismatchError, ObjectNotFound, OperationPermissionError, ValueAlreadyTakenError

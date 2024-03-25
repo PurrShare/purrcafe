@@ -3,10 +3,11 @@ import datetime
 import os
 from typing import Final
 
+from meowid import MeowID
+
 from . import User
 from ._database import _Nothing, database as db, database_lock as db_l
 from .exceptions import WrongHashLengthError, IDNotFoundError, ObjectIDUnknownError, WrongValueLengthError, ValueMismatchError
-from ..meowid import MeowID
 
 
 class File:

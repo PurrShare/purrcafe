@@ -5,6 +5,8 @@ from fastapi.responses import PlainTextResponse
 from slowapi.util import get_remote_address
 from starlette.requests import Request
 
+from meowid import MeowID
+
 from ._common import authorize_user, parse_meowid
 from ._schemas import CreateUser as s_CreateUser, User as s_User, ForeignUser as s_ForeignUser, UpdateUser as s_UpdateUser
 from ... import limiter
@@ -12,7 +14,6 @@ from ..._database import User as m_User
 from ..._database._database import _Nothing
 from ..._database.exceptions import WrongHashLengthError, IDNotFoundError, ValueAlreadyTakenError
 from ..._utils import hash_password
-from ...meowid import MeowID
 
 router = APIRouter()
 

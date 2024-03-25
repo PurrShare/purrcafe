@@ -2,10 +2,11 @@ from __future__ import annotations
 import datetime
 from typing import Final
 
+from meowid import MeowID
+
 from . import User
 from ._database import _Nothing, database as db, database_lock as db_l
 from .exceptions import IDNotFoundError, ObjectIDUnknownError, OperationPermissionError
-from ..meowid import MeowID
 
 
 class Session:

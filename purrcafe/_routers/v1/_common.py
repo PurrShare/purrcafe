@@ -3,10 +3,11 @@ from typing import Annotated
 from fastapi import Depends, HTTPException
 from fastapi.security import OAuth2PasswordBearer
 
+import meowid
+from meowid import MeowID
+
 from ..._database import Session as m_Session, User as m_User, File as m_File
 from ..._database.exceptions import IDNotFoundError
-from ... import meowid
-from ...meowid import MeowID
 
 _oauth2_scheme = OAuth2PasswordBearer(tokenUrl='v1/session/oauth2', auto_error=False)
 

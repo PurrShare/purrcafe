@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import Any
 
-from ..meowid import MeowID
+from meowid import MeowID
 
 
 class DatabaseInternalError(RuntimeError):
